@@ -1,5 +1,3 @@
 *.d
 *.kernel
 *.o
-compile_commands.json
-.cache
