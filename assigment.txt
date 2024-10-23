@@ -1,0 +1,31 @@
+Vytvořili byste operační systém pro x86 (x86_64 dle uvážení), který podporuje:
+- správu přerušení
+- správu virtuální paměti
+- správu uživatelských procesů
+- izolaci uživatelských procesů (vč. stránkování a segmentace) (segmentaci stačí v minimalistickém pojetí, jako se to obvykle u x86 OS dělá)
+- minimalistický souborový systém (stačí in-memory, nic perzistentního není nutné)
+    - můžete se vydat např. cestou UNIXu (/adresar/pod, ...) nebo vytvořit vlastní pohled (C:/slozka/, ...), je to jedno
+    - umožníte procesům vytvářet vlastní soubory
+- systémová volání:
+    - open, read, write, close
+        - aby např. mohl proces udělat: soubor = open("/soubor.txt", O_WR); write(soubor, "hello", 5); close(soubor);
+    - getpid a jiné, které budete potřebovat
+    - potenciálně ioctl, pokud budete potřebovat
+    - pro procesy nemusíte dělat fork() ani CreateProcess, stačí je inicializovat jednou z jádra řízeně v kódu, abyste nemuseli řešit ještě načítání programů
+- time-slicing plánovač, tj. klasický pro interaktivní systémy
+    - nemusí být nijak složitý, stačí round-robin
+- minimalistická standardní knihovna, linkovaná staticky
+
+Vytvoříte ovladače pro:
+- framebuffer (tj. výstup na obrazovku)
+- klávesnice
+- další, které uznáte za vhodné
+
+Volitelně si pak vyberte jedno z následujícího:
+- synchronizační primitiva mutex, semafor a podmínková proměnná
+    - tohle pak demonstrujte například procesy, které si budou navzájem držet mutex po nějaký čas a notifikovat třetí proces o předání řízení
+- sdílená paměť
+    - tohle demonstrujte procesy, které budou na jedné straně něco generovat (např. LCG generátor pseudonáhody, třeba po balíčku 100 čísel) a druhý proces bude čekat a čísla zpracovávat, třeba z nich počítat průměr a směrodatnou odchylku
+- VGA driver pro výstup v základní barevné škále a grafickém režimu
+    - vytvořte minimalistického správce oken
+    - demonstrujte například grafickým terminálem a procesem, který bude umět vykreslit třeba nějakou primitivní bitmapu
