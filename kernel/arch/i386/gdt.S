@@ -1,42 +1,22 @@
-.section .data
-    # Define the GDT pointer structure
-    gdtp:
-        .word gdt_end - gdt - 1    # Limit
-        .long gdt                   # Base address of the GDT
-
-    # Define the GDT with three segments
-    gdt:
-        # Null descriptor
-        .word 0                     # Limit (low)
-        .word 0                     # Base (low)
-        .byte 0                     # Base (mid)
-        .byte 0x9A                  # Access byte: present, privilege level, type
-        .byte 0xCF                  # Granularity: limit high, size, granularity
-        .byte 0                     # Base (high)
-
-        # Code segment descriptor
-        .word 0xFFFF                # Limit (low)
-        .word 0                     # Base (low)
-        .byte 0                     # Base (mid)
-        .byte 0x9A                  # Access byte: present, privilege level, type
-        .byte 0xCF                  # Granularity: limit high, size, granularity
-        .byte 0                     # Base (high)
-
-        # Data segment descriptor
-        .word 0xFFFF                # Limit (low)
-        .word 0                     # Base (low)
-        .byte 0                     # Base (mid)
-        .byte 0x92                  # Access byte: present, privilege level, type
-        .byte 0xCF                  # Granularity: limit high, size, granularity
-        .byte 0                     # Base (high)
-
-    gdt_end:
-
 .section .text
-.global setGdt
+.global load_gdt
 
-setGdt:
-    # Load the GDT
-    lgdt gdtp                    # Load the GDT pointer
+.type load_gdt, @function
+    # void load_gdt(gdt_ptr_t * gdt_ptr)
+load_gdt:
+    movl    4(%esp), %eax
+    lgdt	(%eax)
+
+    # 0x10 is the offset in the GDT to our data segment
+    movw	$0x10, %ax
+    movw	%ax, %ds
+    movw	%ax, %es
+    movw	%ax, %fs
+    movw	%ax, %gs
+    movw	%ax, %ss
+    ljmp	$0x08, $.flush  # Long jump to our new code segment
+.flush:
     ret
 
+
+.size load_gdt, . - load_gdt
