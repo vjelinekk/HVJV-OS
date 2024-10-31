@@ -5,11 +5,6 @@
 idt_entry_t idt_entries[IDT_MAX_DESCRIPTORS];
 idt_ptr_t idt_ptr;
 
-void exception_handler(registers_t regs) {
-    printf("Exception: %d\n", regs.int_no);
-    asm volatile("cli; hlt");
-}
-
 void idt_set_descriptor(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags) {
     idt_entries[num].isr_low = base & 0xFFFF;
     idt_entries[num].isr_high = (base >> 16) & 0xFFFF;
@@ -78,6 +73,4 @@ void init_idt() {
     printf("Flushing IDT.\n");
     printf("IDT address: %x\n", idt_ptr.base); // This should print the base address of the IDT
     load_idt(&idt_ptr);
-
-    asm volatile("sti");
 }

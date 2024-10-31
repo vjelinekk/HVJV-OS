@@ -3,10 +3,11 @@
 .global load_idt
 
 .type load_idt, @function
-    # void load_idt(idt_ptr_t *)
+# void load_idt(idt_ptr_t *)
 load_idt:
     movl	4(%esp),%eax
     lidt	(%eax)
+    sti
     ret
 
 .size load_idt, . - load_idt
@@ -64,7 +65,7 @@ isr_noerr 30
 isr_noerr 31
 
 
-.extern exception_handler
+.extern isr_handler
 isr_stub:
     pusha
 
@@ -78,7 +79,7 @@ isr_stub:
     movw	%ax, %fs
     movw	%ax, %gs
 
-    call	exception_handler
+    call	isr_handler
 
     pop	%eax
     movl	%esi, %eax
@@ -125,6 +126,7 @@ irq 13, 45
 irq 14, 46
 irq 15, 47
 
+.extern irq_handler
 irq_stub:
     pusha
 
@@ -138,7 +140,7 @@ irq_stub:
     movw	%ax, %fs
     movw	%ax, %gs
 
-    call	exception_handler
+    call	irq_handler
 
     pop	%ebx
     movl	%esi, %ebx

@@ -5,6 +5,39 @@
 
 #define IDT_MAX_DESCRIPTORS 256
 
+// Exception Codes (https://wiki.osdev.org/Exceptions)
+#define DIVIDE_ERROR 0
+#define DEBUG 1
+#define NMI 2
+#define BREAKPOINT 3
+#define OVERFLOW 4
+#define BOUNDS 5
+#define INVALID_OPCODE 6
+#define DEVICE_NOT_AVAILABLE 7
+#define DOUBLE_FAULT 8
+#define COPROCESSOR_SEGMENT_OVERRUN 9
+#define INVALID_TSS 10
+#define SEGMENT_NOT_PRESENT 11
+#define STACK_SEGMENT_FAULT 12
+#define GENERAL_PROTECTION 13
+#define PAGE_FAULT 14
+#define FLOATING_POINT_ERROR 16
+#define ALIGNMENT_CHECK 17
+#define MACHINE_CHECK 18
+#define SIMD_FLOATING_POINT 19
+#define VIRTUALIZATION 20
+#define CONTROL_PROTECTION 21
+#define RESERVED 22
+#define RESERVED2 23
+#define RESERVED3 24
+#define RESERVED4 25
+#define RESERVED5 26
+#define RESERVED6 27
+#define HYPERVISOR 28
+#define VMM 29
+#define SECURITY 30
+#define RESERVED7 31
+
 struct idt_entry_struct {
     uint16_t isr_low;
     uint16_t kernel_cs;
