@@ -1,4 +1,5 @@
 #include <kernel/gdt.h>
+#include <stdio.h>
 
 // Internal function prototypes.
 static void gdt_set_gate(int32_t,uint32_t,uint32_t,uint8_t,uint8_t);
@@ -32,6 +33,7 @@ void init_gdt()
     gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); //User mode code segment
     gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); //User mode data segment
 
+    // printf("GDT address: 0x%x\n", gdt_ptr.base);
     load_gdt(&gdt_ptr);
 }
 

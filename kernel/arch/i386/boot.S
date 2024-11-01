@@ -14,7 +14,7 @@
 
 # Reserve a stack for the initial thread.
 .section .bss
-.align 16
+# .align 16
 stack_bottom:
 .skip 16384 # 16 KiB
 stack_top:
@@ -37,4 +37,30 @@ _start:
 	cli
 1:	hlt
 	jmp 1b
+
+.global sti
+sti:
+    sti
+    ret
+
+.global cli
+cli:
+    cli
+    ret
+
+.global sys_cli
+sys_cli:
+    hlt
+    ret
+
+.global sys_sti
+sys_sti:
+    hlt
+    ret
+
+.global pause
+pause:
+    hlt
+    ret
+
 .size _start, . - _start
