@@ -33,6 +33,9 @@ kernel/kernel.o \
 kernel/gdt.o \
 kernel/idt.o \
 kernel/isr.o \
+kernel/pic.o \
+kernel/pit.o \
+kernel/keyboard.o \
 
 OBJS=\
 $(ARCHDIR)/crti.o \

@@ -7,7 +7,6 @@
 load_idt:
     movl	4(%esp),%eax
     lidt	(%eax)
-    sti
     ret
 
 .size load_idt, . - load_idt
