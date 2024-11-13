@@ -36,6 +36,9 @@ kernel/isr.o \
 kernel/pic.o \
 kernel/pit.o \
 kernel/keyboard.o \
+kernel/frame.o \
+kernel/kmalloc.o \
+
 
 OBJS=\
 $(ARCHDIR)/crti.o \

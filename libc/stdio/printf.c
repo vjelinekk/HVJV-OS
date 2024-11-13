@@ -81,10 +81,25 @@ int printf(const char* restrict format, ...) {
             size_t len = strlen(str);
             if (maxrem < len)
                 return -1;
+            if (!print("0x", 2))
+                return -1;
             if (!print(str, len))
                 return -1;
             written += len;
-		} else {
+		} else if (*format == 'b') {
+            format++;
+            int i = va_arg(parameters, int);
+            char str[12];
+            itoa(i, str, 2);
+            size_t len = strlen(str);
+            if (maxrem < len)
+                return -1;
+            if (!print("0b", 2))
+                return -1;
+            if (!print(str, len))
+                return -1;
+            written += len;
+        } else {
 			format = format_begun_at;
 			size_t len = strlen(format);
 			if (maxrem < len) {

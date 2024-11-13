@@ -30,6 +30,8 @@ _start:
 	# Call the global constructors.
 	call _init
 
+    # Multiboot information
+    pushl %ebx 
 	# Transfer control to the main kernel.
 	call kernel_main
 
