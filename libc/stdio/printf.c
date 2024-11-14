@@ -66,7 +66,18 @@ int printf(const char* restrict format, ...) {
             format++;
             int i = va_arg(parameters, int);
             char str[12];
-            itoa(i, str, 10);
+            itoa(i, str, 10, 0);
+            size_t len = strlen(str);
+            if (maxrem < len)
+                return -1;
+            if (!print(str, len))
+                return -1;
+            written += len;
+        } else if (*format == 'u') {
+            format++;
+            unsigned int i = va_arg(parameters, unsigned int);
+            char str[12];
+            itoa(i, str, 10, 1);
             size_t len = strlen(str);
             if (maxrem < len)
                 return -1;
@@ -77,7 +88,7 @@ int printf(const char* restrict format, ...) {
             format++;
             int i = va_arg(parameters, int);
             char str[12];
-            itoa(i, str, 16);
+            itoa(i, str, 16, 0);
             size_t len = strlen(str);
             if (maxrem < len)
                 return -1;
@@ -90,7 +101,7 @@ int printf(const char* restrict format, ...) {
             format++;
             int i = va_arg(parameters, int);
             char str[12];
-            itoa(i, str, 2);
+            itoa(i, str, 2, 0);
             size_t len = strlen(str);
             if (maxrem < len)
                 return -1;
@@ -99,6 +110,44 @@ int printf(const char* restrict format, ...) {
             if (!print(str, len))
                 return -1;
             written += len;
+        } else if (*format == 'l') {
+            format++;
+            if (*format == 'x') {
+                format++;
+                long i = va_arg(parameters, long);
+                char str[12];
+                itoa(i, str, 16, 0);
+                size_t len = strlen(str);
+                if (maxrem < len)
+                    return -1;
+                if (!print("0x", 2))
+                    return -1;
+                if (!print(str, len))
+                    return -1;
+                written += len;
+            } else if (*format == 'u') {
+                format++;
+                unsigned long i = va_arg(parameters, unsigned long);
+                char str[12];
+                itoa(i, str, 10, 1);
+                size_t len = strlen(str);
+                if (maxrem < len)
+                    return -1;
+                if (!print(str, len))
+                    return -1;
+                written += len;
+            } else if (*format == 'd') {
+                format++;
+                long i = va_arg(parameters, long);
+                char str[12];
+                itoa(i, str, 10, 0);
+                size_t len = strlen(str);
+                if (maxrem < len)
+                    return -1;
+                if (!print(str, len))
+                    return -1;
+                written += len;
+            }
         } else {
 			format = format_begun_at;
 			size_t len = strlen(format);

@@ -1,7 +1,6 @@
 #include <stdlib.h>
 
-char* itoa(int value, char* buffer, int base) {
-    // Check for invalid base
+char* itoa(long value, char* buffer, int base, int is_unsigned) {
     if (base < 2 || base > 36) {
         *buffer = '\0'; // Invalid base; return empty string
         return buffer;
@@ -10,27 +9,27 @@ char* itoa(int value, char* buffer, int base) {
     char* ptr = buffer;
     int isNegative = 0;
 
-    // Handle 0 explicitly, since it's a special case
     if (value == 0) {
         *ptr++ = '0';
-        *ptr = '\0'; // Null-terminate the string
+        *ptr = '\0';
         return buffer;
     }
 
-    // Handle negative numbers only for base 10
-    if (value < 0 && base == 10) {
+    // Handle negative numbers only for base 10 and signed values
+    if (!is_unsigned && value < 0 && base == 10) {
         isNegative = 1;
         value = -value; // Make value positive
     }
 
+    unsigned long abs_value = is_unsigned ? (unsigned long)value : (unsigned long)value;
+
     // Convert the number to the specified base
-    while (value != 0) {
-        int remainder = value % base;
-        *ptr++ = (remainder > 9) ? (remainder - 10) + 'a' : remainder + '0'; // Convert to char
-        value /= base;
+    while (abs_value != 0) {
+        int remainder = abs_value % base;
+        *ptr++ = (remainder > 9) ? (remainder - 10) + 'a' : remainder + '0';
+        abs_value /= base;
     }
 
-    // If the number was negative, add the '-' sign
     if (isNegative) {
         *ptr++ = '-';
     }

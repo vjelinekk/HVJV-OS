@@ -71,6 +71,6 @@ uint32_t frame_alloc() {
         }
     }
 
-    return NULL;
+    return -1;
 }
 

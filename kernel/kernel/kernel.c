@@ -20,11 +20,32 @@ void kernel_main(struct multiboot_info *mbi) {
     sti();
     printf("Hello, kernel World!\n");
 
-    uint32_t total_memory_size = mbi->mem_upper + mbi->mem_lower;
-    printf("Total memory size: %d KB\n", total_memory_size);
-    init_frames(total_memory_size);
-    print_frame_bitmap();
-    
+    printf("Flags: %x\n", mbi->flags);
+    printf("Lower memory: %d KB\n", mbi->mem_lower);
+    printf("Upper memory: %d KB\n", mbi->mem_upper);
+    printf("Memory map length: %x\n", mbi->mmap_length);
+    printf("Memory map address: %x\n", mbi->mmap_addr);
+
+    uint32_t i;
+    for(i = 0; i < mbi->mmap_length; 
+        i += sizeof(multiboot_memory_map_t)) 
+    {
+        multiboot_memory_map_t* mmmt = 
+            (multiboot_memory_map_t*) (mbi->mmap_addr + i);
+
+        printf("A lower: %lx, A upper: %lx, L lower: %lx, L upper: %lx, Type: %d\n",
+            mmmt->addr_low, mmmt->addr_high, mmmt->len_low, mmmt->len_high, mmmt->type);
+
+        if(mmmt->type == MULTIBOOT_MEMORY_AVAILABLE) {
+            /* 
+             * Do something with this memory block!
+             * BE WARNED that some of memory shown as availiable is actually 
+             * actively being used by the kernel! You'll need to take that
+             * into account before writing to memory!
+             */
+        }
+    }
+
     while (1) {
         char c = get_ascii_char();
         printf("%c", c);
