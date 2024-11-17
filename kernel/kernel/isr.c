@@ -2,6 +2,7 @@
 #include <kernel/isr.h>
 #include <kernel/port.h>
 #include <kernel/pic.h>
+#include <kernel/interrupt_helpers.h>
 #include <stdio.h>
 
 isr_handler_t interrupt_handlers[256];
@@ -31,6 +32,7 @@ void isr_handler(registers_t regs) {
         interrupt_handlers[regs.int_no](regs);
     }
     printf("End of ISR\n");
+    pause();
 }
 
 void irq_handler(registers_t regs) {
