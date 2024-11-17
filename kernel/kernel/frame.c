@@ -7,26 +7,43 @@
 uint8_t *frame_bitmap;
 uint32_t total_frames;
 
-void init_frames(uint32_t total_memory_size) {
-    uint32_t frame_count = total_memory_size / FRAME_SIZE;
+static void mark_reserved_frames() {
+    uint32_t kernel_end = kmalloc_get_last_address();
+    uint32_t aligned_kernel_end = kernel_end & 0xFFFFF000;
+    uint32_t kernel_end_frame = aligned_kernel_end / FRAME_SIZE;
+    printf("Kernel end frame: %d\n", kernel_end_frame);
 
-    // Align frame count to 8 bytes
-    if (frame_count % 8 != 0) {
-        frame_count += 8 - (frame_count % 8);
+    for (uint32_t i = 0; i < kernel_end_frame; i++) {
+        frame_set(i);
     }
-    total_frames = frame_count;
+}
 
-    uint32_t bitmap_size = frame_count / 8;
+void frame_init_allocator(uint32_t total_memory_size) {
+    uint32_t frame_count = total_memory_size / FRAME_SIZE;
+    total_frames = frame_count;
+    printf("Total frames: %d\n", frame_count);
+
+    uint32_t bitmap_size = (frame_count + 7) / 8;
+    printf("Bitmap size: %d\n", bitmap_size);
     frame_bitmap = (uint8_t *)kmalloc(bitmap_size);
 
     memset(frame_bitmap, FREE, bitmap_size);
+    // mark_reserved_frames();
 }
 
-void print_frame_bitmap() {
+void frame_print_used_frames() {
+    uint32_t used_frames = 0;
     for (uint32_t i = 0; i < total_frames / 8; i++) {
-        printf("%b ", frame_bitmap[i]);
+        if ((frame_bitmap[i] & 0xFF) != 0) {
+            for (uint32_t j = 0; j < 8; j++) {
+                if (frame_bitmap[i] & (1 << j)) {
+                    used_frames++;
+                }
+            }
+            continue;
+        }
     }
-    printf("\n");
+    printf("Used frames: %d\n", used_frames);
 }
 
 void frame_set(uint32_t frame_number) {
@@ -71,6 +88,7 @@ uint32_t frame_alloc() {
         }
     }
 
-    return -1;
+    printf("No free frames available\n");
+    return 0xFFFFFFFF;
 }
 

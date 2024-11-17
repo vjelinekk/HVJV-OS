@@ -38,6 +38,7 @@ kernel/pit.o \
 kernel/keyboard.o \
 kernel/frame.o \
 kernel/kmalloc.o \
+kernel/paging.o \
 
 
 OBJS=\
