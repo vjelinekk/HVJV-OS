@@ -24,7 +24,7 @@ void isr_handler(registers_t regs) {
         printf("ESP: %x\n", regs.esp);
         printf("SS: %x\n", regs.ss);
         printf("DS: %x\n", regs.ds);
-        __asm__ __volatile__("hlt");
+        pause();
     } 
 
     if (interrupt_handlers[regs.int_no]) {

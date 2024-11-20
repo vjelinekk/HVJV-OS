@@ -11,6 +11,7 @@
 
 extern void load_page_directory(uint32_t*);
 extern void enable_paging();
+extern void switch_to_higher_half();
 
 typedef struct {
     uint32_t present    : 1;  // 1 = page present in memory
