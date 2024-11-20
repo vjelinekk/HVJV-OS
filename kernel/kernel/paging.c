@@ -31,6 +31,7 @@ void page_fault_handler(registers_t regs) {
 }
 
 void paging_init(uint32_t total_memory_size) {
+    printf("Initializing paging\n");
     frame_init_allocator(total_memory_size);
 
     kernel_directory = (page_directory_t*)kmalloc_a(sizeof(page_directory_t));
@@ -43,9 +44,6 @@ void paging_init(uint32_t total_memory_size) {
         kernel_directory->physical_tables[i] = 0x00000002;
     }
 
-    page_table_t *kernel_ident = (page_table_t*)kmalloc_a(sizeof(page_table_t));
-    memset(kernel_ident, 0, sizeof(page_table_t));
-
     page_table_t *kernel_higher_half = (page_table_t*)kmalloc_a(sizeof(page_table_t));
     memset(kernel_higher_half, 0, sizeof(page_table_t));
 
@@ -55,15 +53,16 @@ void paging_init(uint32_t total_memory_size) {
             printf("Failed to allocate frame\n");
             return;
         }
-        kernel_ident->pages[i].frame = frame_address >> 12;
-        kernel_ident->pages[i].present = 1;
-        kernel_ident->pages[i].read_write = 1;
-        kernel_ident->pages[i].user_supervisor = 0;
-
         kernel_higher_half->pages[i].frame = frame_address >> 12;
         kernel_higher_half->pages[i].present = 1;
         kernel_higher_half->pages[i].read_write = 1;
         kernel_higher_half->pages[i].user_supervisor = 0;
     }
+
+    uint32_t kernel_higher_index = KERNEL_VIRTUAL_BASE >> 22;
+    kernel_directory->tables[kernel_higher_index] = kernel_higher_half;
+    kernel_directory->physical_tables[kernel_higher_index] = ((uint32_t)kernel_higher_half) | 0x3;
+
+    printf("Paging initialized\n");
 }
 
