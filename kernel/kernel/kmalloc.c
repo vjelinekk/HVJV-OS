@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-uint32_t placement_address = (uint32_t)&kernel_end;
+uint32_t placement_address = (uint32_t)&_kernel_end;
 
 uint32_t kmalloc_impl(uint32_t size, int align, uint32_t *phys) {
     if (align == 1 && (placement_address & 0xFFFFF000)) {

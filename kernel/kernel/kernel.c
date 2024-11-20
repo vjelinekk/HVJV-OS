@@ -1,4 +1,3 @@
-#include "kernel/paging.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <kernel/tty.h>
@@ -20,16 +19,18 @@ void kernel_main(struct multiboot_info *mbi) {
     init_keyboard();
     sti();
     printf("Hello, kernel World!\n");
+    printf("MBI Address: %x\n", mbi);
+    printf("MBI: %x\n", *mbi);
 
-    printf("Flags: %x\n", mbi->flags);
-    printf("Lower memory: %d KB\n", mbi->mem_lower);
-    printf("Upper memory: %d KB\n", mbi->mem_upper);
-    printf("Memory map length: %x\n", mbi->mmap_length);
-    printf("Memory map address: %x\n", mbi->mmap_addr);
-
-    uint32_t total_memory_bytes = (mbi->mem_upper + mbi->mem_lower) * 1024;
-    printf("Total memory: %d KB\n", total_memory_bytes / 1024);
-    // paging_init(total_memory_bytes);
+    // printf("Flags: %x\n", mbi->flags);
+    // printf("Lower memory: %d KB\n", mbi->mem_lower);
+    // printf("Upper memory: %d KB\n", mbi->mem_upper);
+    // printf("Memory map length: %x\n", mbi->mmap_length);
+    // printf("Memory map address: %x\n", mbi->mmap_addr);
+    //
+    // uint32_t total_memory_bytes = (mbi->mem_upper + mbi->mem_lower) * 1024;
+    // printf("Total memory: %d KB\n", total_memory_bytes / 1024);
+    // // paging_init(total_memory_bytes);
 
     while (1) {
         char c = get_ascii_char();
