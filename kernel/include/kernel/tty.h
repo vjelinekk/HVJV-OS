@@ -9,5 +9,6 @@ void terminal_putchar(char c);
 void terminal_write(const char* data, size_t size);
 void terminal_writestring(const char* data);
 void terminal_VGA_MEMORY(uint16_t* new_VGA_MEMORY);
+void terminal_clear();
 
 #endif
