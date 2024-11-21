@@ -1,6 +1,8 @@
 #include <kernel/frame.h>
 #include <kernel/kmalloc.h>
 #include <kernel/paging.h>
+#include <kernel/tty.h>
+#include <kernel/isr.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -8,8 +10,25 @@
 page_directory_t *kernel_directory;
 page_directory_t *current_directory;
 
-uint32_t page_dir[1024] __attribute__((aligned(4096)));
-uint32_t first_page_table[1024] __attribute__((aligned(4096)));
+void page_fault_handler(registers_t regs) {
+    uint32_t faulting_address;
+    __asm__ __volatile__("mov %%cr2, %0" : "=r" (faulting_address));
+
+    int present = !(regs.err_code & 0x1);
+    int rw = regs.err_code & 0x2;
+    int us = regs.err_code & 0x4;
+    int reserved = regs.err_code & 0x8;
+    int id = regs.err_code & 0x10;
+
+    printf("Page fault! ( ");
+    if (present) printf("present ");
+    if (rw) printf("read-only ");
+    if (us) printf("user-mode ");
+    if (reserved) printf("reserved ");
+    if (id) printf("instruction-fetch ");
+    printf(") at %x\n", faulting_address);
+    __asm__ __volatile__("hlt");
+}
 
 void paging_init(uint32_t total_memory_size) {
     frame_init_allocator(total_memory_size);
@@ -24,8 +43,8 @@ void paging_init(uint32_t total_memory_size) {
         kernel_directory->physical_tables[i] = 0x00000002;
     }
 
-    page_table_t *first_page_table = (page_table_t*)kmalloc_a(sizeof(page_table_t));
-    memset(first_page_table, 0, sizeof(page_table_t));
+    page_table_t *kernel_ident = (page_table_t*)kmalloc_a(sizeof(page_table_t));
+    memset(kernel_ident, 0, sizeof(page_table_t));
 
     for (i = 0; i < PAGE_TABLE_SIZE; i++) {
         uint32_t frame_address = frame_alloc();
@@ -33,14 +52,17 @@ void paging_init(uint32_t total_memory_size) {
             printf("Failed to allocate frame\n");
             return;
         }
-        first_page_table->pages[i].frame = frame_address >> 12;
-        first_page_table->pages[i].present = 1;
-        first_page_table->pages[i].read_write = 1;
+        kernel_ident->pages[i].frame = frame_address >> 12;
+        kernel_ident->pages[i].present = 1;
+        kernel_ident->pages[i].read_write = 1;
+        kernel_ident->pages[i].user_supervisor = 0;
     }
 
-    kernel_directory->tables[0] = first_page_table;
-    kernel_directory->physical_tables[0] = ((uint32_t)first_page_table) | 3;
+    kernel_directory->tables[0] = kernel_ident;
+    kernel_directory->physical_tables[0] = ((uint32_t)kernel_ident) | 0x3;
 
+    register_interrupt_handler(14, page_fault_handler);
     load_page_directory(&kernel_directory->physical_tables[0]);
     enable_paging();
 }
+
