@@ -1,4 +1,3 @@
-#include "kernel/paging.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <kernel/tty.h>
@@ -10,6 +9,7 @@
 #include <kernel/interrupt_helpers.h>
 #include <kernel/multiboot.h>
 #include <kernel/frame.h>
+#include <kernel/paging.h>
 
 void kernel_main(struct multiboot_info *mbi) {
 	terminal_initialize();
