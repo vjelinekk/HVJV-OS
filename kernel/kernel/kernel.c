@@ -19,7 +19,8 @@ void kernel_main(struct multiboot_info *mbi) {
     init_timer(100);
     init_keyboard();
     sti();
-    printf("Hello, kernel World!\n");
+
+    mbi = (struct multiboot_info *)((uint32_t)mbi + 0xC0000000);
 
     printf("Flags: %x\n", mbi->flags);
     printf("Lower memory: %d KB\n", mbi->mem_lower);
