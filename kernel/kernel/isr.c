@@ -32,7 +32,6 @@ void isr_handler(registers_t regs) {
         interrupt_handlers[regs.int_no](regs);
     }
     printf("End of ISR\n");
-    pause();
 }
 
 void irq_handler(registers_t regs) {

@@ -30,6 +30,7 @@ void kernel_main(struct multiboot_info *mbi) {
 
     uint32_t total_memory_bytes = (mbi->mem_upper + mbi->mem_lower) * 1024;
     printf("Total memory: %d KB\n", total_memory_bytes / 1024);
+    paging_init(total_memory_bytes);
 
     while (1) {
         char c = get_ascii_char();
