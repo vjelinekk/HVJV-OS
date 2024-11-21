@@ -75,13 +75,13 @@ void paging_init(uint32_t total_memory_size) {
     // Register page fault handler
     register_interrupt_handler(PAGE_FAULT, page_fault_handler);
 
-    // Test address that should be mapped
-    uint32_t *test_address = (uint32_t*)0xC0000000;
-    printf("Test address: %x\n", *test_address);
-
-    // Test address that should not be mapped
-    test_address = (uint32_t*)0x00000000;
-    printf("Test address: %x\n", *test_address);
+    // // Test address that should be mapped
+    // uint32_t *test_address = (uint32_t*)0xC0000000;
+    // printf("Test address: %x\n", *test_address);
+    //
+    // // Test address that should not be mapped
+    // test_address = (uint32_t*)0x00000000;
+    // printf("Test address: %x\n", *test_address);
 
 
     printf("Paging initialized\n");
