@@ -46,9 +46,6 @@ void paging_init(uint32_t total_memory_size) {
     page_table_t *kernel_ident = (page_table_t*)kmalloc_a(sizeof(page_table_t));
     memset(kernel_ident, 0, sizeof(page_table_t));
 
-    page_table_t *kernel_higher_half = (page_table_t*)kmalloc_a(sizeof(page_table_t));
-    memset(kernel_higher_half, 0, sizeof(page_table_t));
-
     for (i = 0; i < PAGE_TABLE_SIZE; i++) {
         uint32_t frame_address = frame_alloc();
         if (frame_address == 0xFFFFFFFF) {
@@ -59,11 +56,13 @@ void paging_init(uint32_t total_memory_size) {
         kernel_ident->pages[i].present = 1;
         kernel_ident->pages[i].read_write = 1;
         kernel_ident->pages[i].user_supervisor = 0;
-
-        kernel_higher_half->pages[i].frame = frame_address >> 12;
-        kernel_higher_half->pages[i].present = 1;
-        kernel_higher_half->pages[i].read_write = 1;
-        kernel_higher_half->pages[i].user_supervisor = 0;
     }
+
+    kernel_directory->tables[0] = kernel_ident;
+    kernel_directory->physical_tables[0] = ((uint32_t)kernel_ident) | 0x3;
+
+    register_interrupt_handler(14, page_fault_handler);
+    load_page_directory(&kernel_directory->physical_tables[0]);
+    enable_paging();
 }
 
