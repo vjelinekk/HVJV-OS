@@ -10,7 +10,7 @@
 
 void frame_init_allocator(uint32_t total_memory_size);
 uint32_t frame_alloc();
-void frame_free(void *frame);
+void frame_free(uint32_t frame);
 
 void frame_set(uint32_t frame_number);
 void frame_clear(uint32_t frame_number);

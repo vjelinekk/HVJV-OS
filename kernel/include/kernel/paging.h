@@ -9,9 +9,16 @@
 #define NUM_PAGES 1024
 #define KERNEL_VIRTUAL_BASE 0xC0000000
 
+#define PAGE_PRESENT  0x1
+#define PAGE_WRITE    0x2
+#define PAGE_USER     0x4
+#define PAGE_KERNEL   0x0
+
+
 extern void load_page_directory(uint32_t*);
 extern void enable_paging();
 extern void switch_to_higher_half();
+extern void flush_tlb();
 
 typedef struct {
     uint32_t present    : 1;  // 1 = page present in memory
@@ -36,5 +43,7 @@ typedef struct {
 } page_directory_t;
 
 void paging_init(uint32_t total_memory_size);
+page_table_entry_t *get_page(uint32_t virtual_address, int make, int is_user_space, page_directory_t *dir);
+page_table_entry_t *get_kernel_page(uint32_t virtual_address, int make);
 
 #endif // !PAGING_H

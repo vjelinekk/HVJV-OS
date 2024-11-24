@@ -20,3 +20,11 @@ enable_paging:
     mov %eax, %cr0
     sti
     ret
+
+.global flush_tlb
+flush_tlb:
+    cli
+    mov %cr3, %eax
+    mov %eax, %cr3
+    sti
+    ret
