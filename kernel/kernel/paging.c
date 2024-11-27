@@ -1,3 +1,4 @@
+#include <kernel/kheap.h>
 #include <kernel/idt.h>
 #include <kernel/interrupt_helpers.h>
 #include <kernel/frame.h>
@@ -11,6 +12,7 @@
 
 page_directory_t *kernel_directory;
 page_directory_t *current_directory;
+uint8_t kheap_initialized = 0;
 
 void page_fault_handler(registers_t regs) {
     uint32_t faulting_address;
@@ -30,6 +32,10 @@ void page_fault_handler(registers_t regs) {
     if (id) printf("instruction-fetch ");
     printf(") at %x\n", faulting_address);
     pause();
+}
+
+void set_kheap_initialized() {
+    kheap_initialized = 1;
 }
 
 void paging_init(uint32_t total_memory_size) {
@@ -91,7 +97,16 @@ page_table_entry_t *get_page(uint32_t virtual_address, int make, int is_user_spa
     if (dir->tables[table_index] != NULL) {
         return &dir->tables[table_index]->pages[page_index];
     } else if (make) {
-        page_table_t *table = (page_table_t*)kmalloc_early_a(sizeof(page_table_t));
+        page_table_t *table;
+        uint32_t phys_addr;
+        if (kheap_initialized) {
+            table = (page_table_t *)kmalloc_ap(sizeof(page_table_t), &phys_addr);
+            // printf("table: %x\n", table);
+            // printf("phys: %x\n", phys_addr);
+        } else {
+            table = (page_table_t *)kmalloc_early_a(sizeof(page_table_t));
+            phys_addr = (uint32_t)table - KERNEL_VIRTUAL_BASE;
+        }
 
         if (table == NULL) {
             return NULL;
@@ -99,7 +114,7 @@ page_table_entry_t *get_page(uint32_t virtual_address, int make, int is_user_spa
         
         dir->tables[table_index] = table;
         memset(dir->tables[table_index], 0, sizeof(page_table_t));
-        uint32_t phys_addr = (uint32_t)table - KERNEL_VIRTUAL_BASE;
+        // printf("phys_addr: %x\n", phys_addr);
 
         uint32_t phys_addr_with_flags = phys_addr | PAGE_PRESENT | PAGE_WRITE;
         if (is_user_space) {

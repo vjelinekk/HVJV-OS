@@ -10,6 +10,8 @@
 #define KHEAP_INITIAL_SIZE_PAGES (KHEAP_INITIAL_SIZE / 4096)
 // max heap size is 4MB
 #define KHEAP_MAX_SIZE 0x400000
+// alignment
+#define ALIGNMENT 0x1000
 
 struct block {
     uint32_t size;
@@ -21,6 +23,8 @@ typedef struct block block_t;
 
 void kheap_init();
 void *kmalloc(uint32_t size);
+void *kmalloc_a(uint32_t size);
+void *kmalloc_ap(uint32_t size, uint32_t *phys);
 void kfree(void *ptr);
 
 void kheap_print();

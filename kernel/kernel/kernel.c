@@ -35,12 +35,6 @@ void kernel_main(struct multiboot_info *mbi) {
     paging_init(total_memory_bytes);
     kheap_init();
 
-    uint8_t *ptr = kmalloc((5 * 1024 * 1024) + 1);
-    printf("Allocated memory at %x\n", ptr);
-    uint8_t *ptr2 = kmalloc(100);
-    printf("Allocated memory at %x\n", ptr2);
-    kheap_print();
-
     while (1) {
         char c = get_ascii_char();
         printf("%c", c);
