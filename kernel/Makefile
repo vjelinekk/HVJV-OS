@@ -37,8 +37,10 @@ kernel/pic.o \
 kernel/pit.o \
 kernel/keyboard.o \
 kernel/frame.o \
-kernel/kmalloc.o \
+kernel/kmalloc_early.o \
 kernel/paging.o \
+kernel/page_allocator.o \
+kernel/kheap.o \
 
 
 OBJS=\

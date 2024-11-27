@@ -1,22 +1,11 @@
 #include <kernel/frame.h>
-#include <kernel/kmalloc.h>
+#include <kernel/kmalloc_early.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
 uint8_t *frame_bitmap;
 uint32_t total_frames;
-
-static void mark_reserved_frames() {
-    uint32_t kernel_end = kmalloc_get_last_address();
-    uint32_t aligned_kernel_end = kernel_end & 0xFFFFF000;
-    uint32_t kernel_end_frame = aligned_kernel_end / FRAME_SIZE;
-    printf("Kernel end frame: %d\n", kernel_end_frame);
-
-    for (uint32_t i = 0; i < kernel_end_frame; i++) {
-        frame_set(i);
-    }
-}
 
 void frame_init_allocator(uint32_t total_memory_size) {
     uint32_t frame_count = total_memory_size / FRAME_SIZE;
@@ -25,10 +14,9 @@ void frame_init_allocator(uint32_t total_memory_size) {
 
     uint32_t bitmap_size = (frame_count + 7) / 8;
     printf("Bitmap size: %d\n", bitmap_size);
-    frame_bitmap = (uint8_t *)kmalloc(bitmap_size);
+    frame_bitmap = (uint8_t *)kmalloc_early(bitmap_size);
 
     memset(frame_bitmap, FREE, bitmap_size);
-    // mark_reserved_frames();
 }
 
 void frame_print_used_frames() {
@@ -66,12 +54,8 @@ void frame_clear(uint32_t frame_number) {
     frame_bitmap[index] &= ~(USED << offset);
 }
 
-void frame_free(void *frame) {
-    if (frame == NULL) {
-        return;
-    }
-
-    uint32_t frame_number = (uint32_t)frame / FRAME_SIZE;
+void frame_free(uint32_t frame) {
+    uint32_t frame_number = frame / FRAME_SIZE;
     frame_clear(frame_number);
 }
 

@@ -7,7 +7,7 @@
     - [ ] open, read, write, close
     - [ ] getpid
 - [ ] plánovač (round-robin)
-- [ ] minimalistická standardní knihovna, linkována staticky
+- [x] minimalistická standardní knihovna, linkována staticky
 - [x] ovladače:
     - [x] klávesnice
     - [x] framebuffer
