@@ -43,3 +43,15 @@ void kernel_main(struct multiboot_info *mbi) {
         printf("%c", c);
     }
 }
+
+void process_1() {
+    while (1) {
+        printf("%c", '1');
+    }
+}
+
+void process_2() {
+    while(1){
+        printf("%c", '2');
+    }
+}
