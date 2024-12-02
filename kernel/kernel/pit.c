@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <kernel/isr.h>
 #include <kernel/port.h>
+#include <kernel/scheduler.h>
 
 void timer_callback(registers_t regs)
 {
@@ -12,6 +13,7 @@ void timer_callback(registers_t regs)
 void init_timer(uint32_t frequency)
 {
     printf("Initializing PIT timer\n");
+
     register_interrupt_handler(IRQ0, &timer_callback);
 
     uint32_t divisor;

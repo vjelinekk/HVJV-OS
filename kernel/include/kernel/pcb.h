@@ -1,5 +1,6 @@
 
 #ifndef PCB_H
+#define PCB_H
 
 #include <stdint.h>
 enum  process_state {
@@ -10,13 +11,6 @@ enum  process_state {
 };
 
 struct cpu_context {
-    uint32_t eax;
-    uint32_t ebx;
-    uint32_t ecx;
-    uint32_t edx;
-    uint32_t esi;
-    uint32_t edi;
-    uint32_t eip;
     uint32_t esp;
 };
 

@@ -1,4 +1,5 @@
 #include "kernel/file_system.h"
+#include "kernel/scheduler.h"
 #include <kernel/kheap.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -20,10 +21,12 @@ void kernel_main(struct multiboot_info *mbi) {
     pic_remap();
     init_gdt();
     init_idt();
-    init_timer(100);
+    init_timer(1);
+    printf("here1");
     init_keyboard();
+    printf("here2");
     sti();
-
+    printf("here3");
     mbi = (struct multiboot_info *)((uint32_t)mbi + 0xC0000000);
 
     printf("Flags: %x\n", mbi->flags);
@@ -37,6 +40,7 @@ void kernel_main(struct multiboot_info *mbi) {
     paging_init(total_memory_bytes);
     kheap_init();
     fs_init();
+    init_scheduler();
 
     while (1) {
         char c = get_ascii_char();
