@@ -22,11 +22,8 @@ void kernel_main(struct multiboot_info *mbi) {
     init_gdt();
     init_idt();
     init_timer(1);
-    printf("here1");
     init_keyboard();
-    printf("here2");
     sti();
-    printf("here3");
     mbi = (struct multiboot_info *)((uint32_t)mbi + 0xC0000000);
 
     printf("Flags: %x\n", mbi->flags);
@@ -48,14 +45,3 @@ void kernel_main(struct multiboot_info *mbi) {
     }
 }
 
-void process_1() {
-    while (1) {
-        printf("%c", '1');
-    }
-}
-
-void process_2() {
-    while(1){
-        printf("%c", '2');
-    }
-}

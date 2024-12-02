@@ -14,6 +14,10 @@ page_directory_t *kernel_directory;
 page_directory_t *current_directory;
 uint8_t kheap_initialized = 0;
 
+page_directory_t *get_kernel_directory() {
+    return kernel_directory;
+}
+
 void page_fault_handler(registers_t regs) {
     uint32_t faulting_address;
     __asm__ __volatile__("mov %%cr2, %0" : "=r" (faulting_address));

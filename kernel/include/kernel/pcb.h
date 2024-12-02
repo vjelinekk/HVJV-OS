@@ -2,9 +2,18 @@
 #ifndef PCB_H
 #define PCB_H
 
+#include "kernel/paging.h"
 #include <stdint.h>
+
+#define DEFALUT_TIME_SLICE 0x40
+
+#define USER_STACK_SIZE 1000 // number of pages
+#define USER_CODE_SIZE 16 // number of pages
+#define USER_STACK_ADDRESS 0x60000000 
+#define USER_CODE_ADDRESS 0x8000
+
 enum  process_state {
-    new,
+    state_new,
     runnable,
     running,
     blocked
@@ -12,6 +21,7 @@ enum  process_state {
 
 struct cpu_context {
     uint32_t esp;
+    uint32_t eip;
 };
 
 struct pcb_block {
@@ -19,6 +29,8 @@ struct pcb_block {
     enum process_state state;
     struct cpu_context context;
     uint32_t time_slice;
+    page_directory_t *page_directory_v; // page directory virtual adress
+    uint32_t PD_f;
 };
 
 struct pcb_list_node {
