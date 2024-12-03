@@ -133,4 +133,16 @@ page_table_entry_t *get_kernel_page(uint32_t virtual_address, int make) {
     return get_page(virtual_address, make, 0, kernel_directory);
 }
 
+uint32_t virt_to_phys(uint32_t virtual_address, page_directory_t *dir) {
+    if (!dir) {
+        dir = kernel_directory;
+    }
 
+    page_table_entry_t *page = get_page(virtual_address, 0, 0, dir);
+    if (page == NULL) {
+        return 0;
+    }
+
+    uint32_t frame = page->frame;
+    return ((frame << 12) + (virtual_address & 0xFFF));
+}
