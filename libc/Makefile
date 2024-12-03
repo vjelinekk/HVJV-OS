@@ -14,7 +14,7 @@ INCLUDEDIR?=$(PREFIX)/include
 LIBDIR?=$(EXEC_PREFIX)/lib
 
 CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra
-CPPFLAGS:=$(CPPFLAGS) -D__is_libc -Iinclude
+CPPFLAGS:=$(CPPFLAGS) -Iinclude
 LIBK_CFLAGS:=$(CFLAGS)
 LIBK_CPPFLAGS:=$(CPPFLAGS) -D__is_libk
 
@@ -26,6 +26,20 @@ CFLAGS:=$(CFLAGS) $(ARCH_CFLAGS)
 CPPFLAGS:=$(CPPFLAGS) $(ARCH_CPPFLAGS)
 LIBK_CFLAGS:=$(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
 LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
+
+# Select target (libk or libc)
+ifeq ($(TARGET),libk)
+    # For kernel build
+    CFLAGS:=$(CFLAGS) $(LIBK_CFLAGS)
+    CPPFLAGS:=$(CPPFLAGS) $(LIBK_CPPFLAGS)
+    BINARIES=libk.a
+    OBJS=$(FREEOBJS)  # Kernel-specific objects
+else
+    # For libc (user-space)
+    CPPFLAGS:=$(CPPFLAGS) -D__is_libc
+    BINARIES=libc.a
+    OBJS=$(FREEOBJS) $(HOSTEDOBJS)  # User-space objects
+endif
 
 FREEOBJS=\
 $(ARCH_FREEOBJS) \
@@ -43,14 +57,7 @@ string/strlen.o \
 HOSTEDOBJS=\
 $(ARCH_HOSTEDOBJS) \
 
-OBJS=\
-$(FREEOBJS) \
-$(HOSTEDOBJS) \
-
 LIBK_OBJS=$(FREEOBJS:.o=.libk.o)
-
-#BINARIES=libc.a libk.a # Not ready for libc yet.
-BINARIES=libk.a
 
 .PHONY: all clean install install-headers install-libs
 .SUFFIXES: .o .libk.o .c .S

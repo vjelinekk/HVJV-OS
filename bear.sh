@@ -7,7 +7,7 @@ rm -f compile_commands.json
 
 # Generate compile_commands.json for each project
 for PROJECT in $PROJECTS; do
-  (cd $PROJECT && DESTDIR="$SYSROOT" bear -- $MAKE install)
+    (cd $PROJECT && DESTDIR="$SYSROOT" bear -- $MAKE install TARGET=libk)
 done
 
 # Merge compile_commands.json from each project into a single file
