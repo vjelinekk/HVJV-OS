@@ -81,6 +81,7 @@ void paging_init(uint32_t total_memory_size) {
 
     uint32_t kernel_page_dir_phys_addr = (uint32_t)&kernel_directory->physical_tables[0] - KERNEL_VIRTUAL_BASE;
 
+
     load_page_directory((uint32_t*)kernel_page_dir_phys_addr);
 
     // Register page fault handler
