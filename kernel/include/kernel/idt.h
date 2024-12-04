@@ -123,6 +123,8 @@ extern void irq13();
 extern void irq14();
 extern void irq15();
 
+extern void syscall_handler();
+
 void idt_set_descriptor(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags);
 
 extern void load_idt(idt_ptr_t*);
