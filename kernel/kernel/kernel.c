@@ -14,18 +14,6 @@
 #include <kernel/page_allocator.h>
 #include <string.h>
 
-void test_syscall(int syscall_number, int arg1, int arg2) {
-    asm volatile (
-        "movl %0, %%eax\n"  // Syscall number
-        "movl %1, %%ebx\n"  // First argument
-        "movl %2, %%ecx\n"  // Second argument
-        "int $0x80"         // Trigger interrupt
-        :
-        : "r"(syscall_number), "r"(arg1), "r"(arg2)
-        : "eax", "ebx", "ecx", "memory"
-    );
-}
-
 void kernel_main(struct multiboot_info *mbi) {
 	terminal_initialize();
     pic_remap();
@@ -47,26 +35,6 @@ void kernel_main(struct multiboot_info *mbi) {
     printf("Total memory: %d KB\n", total_memory_bytes / 1024);
     paging_init(total_memory_bytes);
     kheap_init();
-
-    const char *message = "Hello from user space simulation!\n";
-    uint32_t length = strlen(message);
-
-    // Place the syscall number and arguments in registers
-    int result;
-    asm volatile (
-        "movl $0, %%eax\n"    // Syscall number for write (0)
-        "movl %1, %%ebx\n"    // Argument 1: pointer to message
-        "movl %2, %%ecx\n"    // Argument 2: length of message
-        "int $0x80\n"         // Trigger syscall
-        "movl %%eax, %0\n"    // Return value in eax
-        : "=r"(result)        // Output
-        : "r"(message), "r"(length) // Inputs
-        : "eax", "ebx", "ecx" // Clobbered registers
-    );
-
-    // Continue with kernel execution
-    printf("Syscall simulation complete.\n");
-    printf("Syscall returned: %d\n", result);
 
     while (1) {
         char c = get_ascii_char();
