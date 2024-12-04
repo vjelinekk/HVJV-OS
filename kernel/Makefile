@@ -44,6 +44,7 @@ kernel/paging.o \
 kernel/page_allocator.o \
 kernel/kheap.o \
 kernel/syscall.o \
+kernel/file_system.o \
 
 
 OBJS=\

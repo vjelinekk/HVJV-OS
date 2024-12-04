@@ -2,7 +2,7 @@
 - [ ] správá virtuální paměti
 - [ ] správa uživatelských procesů
 - [ ] izolace uživatelských procesů
-- [ ] minimalistický souboroý systém
+- [x] minimalistický souboroý systém
 - [ ] systémové volání
     - [ ] open, read, write, close
     - [ ] getpid

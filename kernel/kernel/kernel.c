@@ -1,3 +1,4 @@
+#include "kernel/file_system.h"
 #include <kernel/kheap.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -12,6 +13,7 @@
 #include <kernel/frame.h>
 #include <kernel/paging.h>
 #include <kernel/page_allocator.h>
+#include <string.h>
 
 void kernel_main(struct multiboot_info *mbi) {
 	terminal_initialize();
@@ -34,6 +36,7 @@ void kernel_main(struct multiboot_info *mbi) {
     printf("Total memory: %d KB\n", total_memory_bytes / 1024);
     paging_init(total_memory_bytes);
     kheap_init();
+    fs_init();
 
     while (1) {
         char c = get_ascii_char();
