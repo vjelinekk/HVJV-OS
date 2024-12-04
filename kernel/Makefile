@@ -43,6 +43,7 @@ kernel/kmalloc_early.o \
 kernel/paging.o \
 kernel/page_allocator.o \
 kernel/kheap.o \
+kernel/syscall.o \
 
 
 OBJS=\

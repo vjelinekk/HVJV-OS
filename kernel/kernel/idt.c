@@ -70,6 +70,9 @@ void init_idt() {
     idt_set_descriptor(46, (uint32_t)irq14, 0x08, 0x8E);
     idt_set_descriptor(47, (uint32_t)irq15, 0x08, 0x8E);
 
+    // syscall entry
+    idt_set_descriptor(0x80, (uint32_t)syscall_handler, 0x08, 0xEE);
+
     // printf("Flushing IDT.\n");
     // printf("IDT address: %x\n", idt_ptr.base); // This should print the base address of the IDT
     load_idt(&idt_ptr);
