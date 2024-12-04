@@ -12,7 +12,6 @@
 #include <kernel/frame.h>
 #include <kernel/paging.h>
 #include <kernel/page_allocator.h>
-#include <string.h>
 
 void kernel_main(struct multiboot_info *mbi) {
 	terminal_initialize();
