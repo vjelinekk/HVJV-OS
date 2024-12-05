@@ -5,7 +5,7 @@
 #include "kernel/paging.h"
 #include <stdint.h>
 
-#define DEFALUT_TIME_SLICE 0x40
+#define DEFALUT_TIME_SLICE 0x50
 
 #define USER_STACK_SIZE 1000 // number of pages
 #define USER_CODE_SIZE 16 // number of pages
@@ -30,7 +30,7 @@ struct pcb_block {
     struct cpu_context context;
     uint32_t time_slice;
     page_directory_t *page_directory_v; // page directory virtual adress
-    uint32_t PD_f;
+    uint32_t pd_phys;
 };
 
 struct pcb_list_node {
@@ -39,5 +39,5 @@ struct pcb_list_node {
     struct pcb_block process;
 };
 typedef struct pcb_list_node pcb_list_node_t ;
-#endif //!PCB_H
+#endif //!pcb_h
 

@@ -3,8 +3,8 @@
 
 #include <kernel/pcb.h>
 
-
-void init_scheduler();
-void create_process(void(*fnc)(void));
+extern void register_context_switch(uint32_t esp, uint32_t eip);
+void scheduler_init();
+void create_process();
 void schedule();
 #endif // !SCHED_H
