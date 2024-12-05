@@ -103,7 +103,7 @@ void switch_process(pcb_list_node_t *process_node) {
         return;
     }
     
-    printf("switching %d -> %d           \r", current->process.pid, process_node->process.pid);
+    printf("switching %d -> %d           \n", current->process.pid, process_node->process.pid);
     current->process.time_slice = 0;
     current->process.state = runnable;
     
@@ -126,7 +126,7 @@ void schedule() {
     }
 
 
-    if(current->process.time_slice > 0) {
+    if(current->process.time_slice > 0 && current->process.state == running) {
         current->process.time_slice--;
     }
     else {
