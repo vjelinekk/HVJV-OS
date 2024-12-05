@@ -1,3 +1,4 @@
+#include <kernel/tty.h>
 #include <kernel/idt.h>
 #include <kernel/isr.h>
 #include <kernel/port.h>
@@ -12,19 +13,15 @@ void register_interrupt_handler(uint8_t n, isr_handler_t handler) {
 }
 
 void isr_handler(registers_t regs) {
+    terminal_clear();
     printf("ISR\n");
-    printf("Interrupt number: %d\n", regs.int_no);
     printf("Error code: %x\n", regs.err_code);
-    if (regs.int_no == GENERAL_PROTECTION) {
-        printf("General Protection Fault\n");
-        printf("Error code: %x\n", regs.err_code);
-        printf("EIP: %x\n", regs.eip);
-        printf("CS: %x\n", regs.cs);
-        printf("EFLAGS: %x\n", regs.eflags);
-        printf("ESP: %x\n", regs.esp);
-        printf("SS: %x\n", regs.ss);
-        printf("DS: %x\n", regs.ds);
-    } 
+    printf("EIP: %x\n", regs.eip);
+    printf("CS: %x\n", regs.cs);
+    printf("EFLAGS: %x\n", regs.eflags);
+    printf("ESP: %x\n", regs.esp);
+    printf("SS: %x\n", regs.ss);
+    printf("DS: %x\n", regs.ds);
 
     if (interrupt_handlers[regs.int_no]) {
         printf("Calling interrupt handler for interrupt %x\n", regs.int_no);

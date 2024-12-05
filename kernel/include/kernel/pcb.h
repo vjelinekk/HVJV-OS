@@ -20,14 +20,21 @@ enum  process_state {
 };
 
 struct cpu_context {
-    uint32_t esp;
-    uint32_t eip;
+    // General-purpose registers
+    uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
+    // Processor state
+    uint32_t eip, eflags;
+    // Segment registers
+    uint32_t cs, ss, ds;
+    // User-mode stack
+    uint32_t useresp;
 };
 
 struct pcb_block {
     uint8_t pid;
     enum process_state state;
     struct cpu_context context;
+    uint32_t process_kernel_stack;
     uint32_t time_slice;
     page_directory_t *page_directory_v; // page directory virtual adress
     uint32_t pd_phys;
