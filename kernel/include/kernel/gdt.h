@@ -29,9 +29,12 @@ typedef struct gdt_ptr_struct gdt_ptr_t;
 //extern void load_gdt(uint32_t);
 extern void load_gdt(gdt_ptr_t * gdt_ptr);
 
+extern void tss_flush();
+
 void init_gdt();
 gdt_ptr_t * get_gdt_ptr();
 gdt_entry_t * get_gdt_entry();
 gdt_entry_t get_gdt_entry_at(int index);
+void tss_switch(uint32_t esp0);
 
 #endif
