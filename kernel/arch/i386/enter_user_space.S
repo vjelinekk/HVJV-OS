@@ -15,4 +15,4 @@ jump_usermode:
     pushfl                      # push EFLAGS
     pushl $((3 * 8) | 3)        # push code selector (ring 3)
     pushl $(0x8000)   # push instruction pointer for user function
-    iret                        # interrupt return to switch to user mode
+    iret

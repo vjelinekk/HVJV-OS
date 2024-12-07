@@ -25,9 +25,11 @@ int8_t last_pid = 0;
 
 void scheduler_init() {
     create_process((char*)&_binary_bin_process_1_bin_start, (uint32_t)&_binary_bin_process_1_bin_size);
-    create_process((char*)&_binary_bin_process_2_bin_start, (uint32_t)&_binary_bin_process_2_bin_size);
-    // now we have created the processes, we can start the scheduler
+    // create_process((char*)&_binary_bin_process_2_bin_start, (uint32_t)&_binary_bin_process_2_bin_size);
+    // // now we have created the processes, we can start the scheduler
     register_interrupt_handler(IRQ0, &schedule);
+    // // now we start the first process and enter the user space
+    enter_user_space(current);
 }
 
 void map_process_pages(pcb_list_node_t *process_node) {
@@ -55,11 +57,14 @@ void map_process_pages(pcb_list_node_t *process_node) {
     process_node->process.page_directory_v = process_directory;
     process_node->process.context.esp = next_stack_page;
     process_node->process.context.eip = USER_CODE_ADDRESS;
+    process_node->process.context.ebp = next_stack_page;
+    process_node->process.context.eflags = 0x202;
+    process_node->process.context.cs = (3 * 8) | 0x3;
+    process_node->process.context.ds = (4 * 8) | 0x3;
+    process_node->process.context.ss = (4 * 8) | 0x3;
 }
 
-void map_process(pcb_list_node_t *process_node, char *process_start, uint32_t process_size) {
-    printf("Process start: %x\n", process_start);
-    printf("Process size: %x\n", process_size);
+void load_process_code(pcb_list_node_t *process_node, char *process_start, uint32_t process_size) {
     // switch to the process page directory
     load_page_directory((uint32_t*)process_node->process.pd_phys);
     memcpy((uint32_t*)process_node->process.context.eip, process_start, process_size);
@@ -86,10 +91,10 @@ void create_process(char *process_start, uint32_t process_size) {
     new_process->process.pid = last_pid++;
     new_process->process.state = state_new;
     new_process->process.time_slice = DEFALUT_TIME_SLICE;
-    new_process->process.process_kernel_stack = (uint32_t)kmalloc_a(1024);
+    new_process->process.process_kernel_stack = (uint32_t)kmalloc_a(1024) + 1024;
 
     map_process_pages(new_process);
-    map_process(new_process, process_start, process_size);
+    load_process_code(new_process, process_start, process_size);
 }
 
 
@@ -104,62 +109,47 @@ pcb_list_node_t *find_to_switch() {
 }
 
 void switch_process(registers_t regs) {
-    pcb_list_node_t *next_process_node = find_to_switch();
-
-    if(next_process_node == NULL || next_process_node->process.state == blocked) {
+    // Find the next process to switch to
+    pcb_list_node_t *next = find_to_switch();
+    if (next == current || next->process.state == blocked) {
         return;
     }
 
-    if (next_process_node->process.state == state_new) {
-        terminal_clear();
-
-        printf("New process PD: %x\n", next_process_node->process.pd_phys);
-        printf("New process kernel stack: %x\n", next_process_node->process.process_kernel_stack);
-        pause();
-
-        start_process(next_process_node);
-        return;
-    }
-
-    // now we need to save the registers into the current process PCB
+    // Save the current process context
     current->process.context.eax = regs.eax;
     current->process.context.ebx = regs.ebx;
     current->process.context.ecx = regs.ecx;
     current->process.context.edx = regs.edx;
+    current->process.context.ebp = regs.ebp;
     current->process.context.esi = regs.esi;
     current->process.context.edi = regs.edi;
-    current->process.context.ebp = regs.ebp;
-    current->process.context.esp = regs.esp;
-    current->process.context.eip = regs.eip;
+    current->process.context.esp = regs.esp;  // Kernel stack pointer
+    current->process.context.eip = regs.eip;  // Return address
     current->process.context.eflags = regs.eflags;
     current->process.context.cs = regs.cs;
     current->process.context.ds = regs.ds;
     current->process.context.ss = regs.ss;
 
-    // we mark the current process as runnable
-    current->process.time_slice = 0;
+    // Update the current process state
     current->process.state = runnable;
 
-    current = next_process_node;
+    // Load the next process's page directory
+    load_page_directory((uint32_t *)next->process.pd_phys);
+
+    // Prepare the next process for execution
+    current = next;  // Update the global current process pointer
     current->process.state = running;
     current->process.time_slice = DEFALUT_TIME_SLICE;
 
-    // Load the new process page directory
-    load_page_directory((uint32_t *)current->process.pd_phys);
-
-    // Update TSS with the new process's kernel stack
-    tss_switch(current->process.process_kernel_stack + 1024);
-
-    // Restore general-purpose registers for the new process
-    restore_general_purpose_registers(current->process.context);
-
-    // Switch to the new process using IRET-ready state
-    switch_to_process(current->process.context);
+    // Switch kernel stack and context
+    tss_switch(current->process.process_kernel_stack);
+    context_switch(current->process.context);
 }
 
-void start_process(pcb_list_node_t *process_node) {
+
+void enter_user_space(pcb_list_node_t *process_node) {
     process_node->process.state = running;
-    tss_switch(process_node->process.process_kernel_stack + 1024);
+    tss_switch(process_node->process.process_kernel_stack);
     load_page_directory((uint32_t*)process_node->process.pd_phys);
     jump_usermode();
 }
@@ -167,10 +157,6 @@ void start_process(pcb_list_node_t *process_node) {
 void schedule(registers_t regs) {
     if(current == NULL) {
         return;
-    }
-
-    if (current->process.state == state_new) { // first time running
-        start_process(current);
     }
 
     if (current->process.time_slice > 0 && current->process.state == running) {
