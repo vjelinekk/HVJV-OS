@@ -196,7 +196,6 @@ void *kmalloc_a(uint32_t size) {
 
 void *kmalloc_ap(uint32_t size, uint32_t *phys) {
     void *virt = kmalloc_impl(size, 1);
-    printf("virt: %x\n", virt);
     if (virt == NULL) {
         return NULL;
     }

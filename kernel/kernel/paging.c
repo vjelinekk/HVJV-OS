@@ -14,6 +14,10 @@ page_directory_t *kernel_directory;
 page_directory_t *current_directory;
 uint8_t kheap_initialized = 0;
 
+page_directory_t *get_kernel_directory() {
+    return kernel_directory;
+}
+
 void page_fault_handler(registers_t regs) {
     uint32_t faulting_address;
     __asm__ __volatile__("mov %%cr2, %0" : "=r" (faulting_address));
@@ -76,6 +80,7 @@ void paging_init(uint32_t total_memory_size) {
     kernel_directory->physical_tables[kernel_higher_index] = (((uint32_t)kernel_higher_half) - KERNEL_VIRTUAL_BASE) | PAGE_PRESENT | PAGE_WRITE;
 
     uint32_t kernel_page_dir_phys_addr = (uint32_t)&kernel_directory->physical_tables[0] - KERNEL_VIRTUAL_BASE;
+
 
     load_page_directory((uint32_t*)kernel_page_dir_phys_addr);
 

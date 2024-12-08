@@ -1,7 +1,8 @@
 #include <stdio.h>
 
 int main() {
-    printf("Test\n");
-
+    for (int i = 0; i < 10; i++) {
+        printf("Hello from process 1\n");
+    }
     return 0;
 }

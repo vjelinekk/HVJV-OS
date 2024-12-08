@@ -1,18 +1,19 @@
 #include <kernel/gdt.h>
+#include <kernel/tss.h>
 #include <stdio.h>
+#include <string.h>
 
 // Internal function prototypes.
 static void gdt_set_gate(int32_t,uint32_t,uint32_t,uint8_t,uint8_t);
 
-gdt_entry_t gdt_entries[5];
+gdt_entry_t gdt_entries[6];
 gdt_ptr_t   gdt_ptr;
-//idt_entry_t idt_entries[256];
-//idt_ptr_t   idt_ptr;
 
+tss_entry_t tss_entry;
 
 void init_gdt()
 {
-    gdt_ptr.limit = (sizeof(gdt_entry_t)*5) - 1;
+    gdt_ptr.limit = (sizeof(gdt_entry_t)*6) - 1;
     gdt_ptr.base = (uint32_t)&gdt_entries;
 
     /*
@@ -33,8 +34,17 @@ void init_gdt()
     gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); //User mode code segment
     gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); //User mode data segment
 
-    // printf("GDT address: 0x%x\n", gdt_ptr.base);
+    // Set up our TSS
+    memset(&tss_entry, 0, sizeof(tss_entry_t));
+    tss_entry.ss0 = 0x10;  // Set the kernel stack segment.
+    tss_entry.esp0 = 0x0;  // Set the kernel stack pointer.
+    printf("TSS base: %x\n", &tss_entry);
+    
+    // Add our TSS to the GDT
+    gdt_set_gate(5, (uint32_t)&tss_entry, sizeof(tss_entry_t), 0xE9, 0x00);
+
     load_gdt(&gdt_ptr);
+    tss_flush();
 }
 
 // get the gtd_ptr struct
@@ -53,6 +63,11 @@ gdt_entry_t * get_gdt_entry()
 gdt_entry_t get_gdt_entry_at(int index)
 {
     return gdt_entries[index];
+}
+
+void tss_switch(uint32_t esp0)
+{
+    tss_entry.esp0 = esp0;
 }
 
 

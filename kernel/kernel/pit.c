@@ -1,18 +1,11 @@
-#include "kernel/pic.h"
 #include <kernel/pit.h>
 #include <stdio.h>
 #include <kernel/isr.h>
 #include <kernel/port.h>
+#include <kernel/scheduler.h>
 
-void timer_callback(registers_t regs)
-{
-    outb(MASTER_COMMAND, PIC_EOI);
-}
-
-void init_timer(uint32_t frequency)
-{
+void init_timer(uint32_t frequency) {
     printf("Initializing PIT timer\n");
-    register_interrupt_handler(IRQ0, &timer_callback);
 
     uint32_t divisor;
     if(frequency)
