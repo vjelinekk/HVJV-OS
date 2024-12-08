@@ -12,6 +12,7 @@ void create_process(char *process_start, uint32_t process_size);
 void enter_user_space(pcb_list_node_t *process_node);
 void switch_process(registers_t regs);
 void process_exit();
+int get_pid();
 void schedule(registers_t regs);
 void scheduler_print();
 

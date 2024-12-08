@@ -192,6 +192,10 @@ void process_exit() {
     load_next_process(next);
 }
 
+int get_pid() {
+    return current->process.pid;
+}
+
 void schedule(registers_t regs) {
     if(current == NULL) {
         return;

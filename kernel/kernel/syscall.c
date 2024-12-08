@@ -1,3 +1,4 @@
+#include <kernel/file_system.h>
 #include <kernel/scheduler.h>
 #include <kernel/tty.h>
 #include <kernel/syscall.h>
@@ -22,6 +23,44 @@ int syscall_exit(int return_code) {
     return 0;
 }
 
+int syscall_open(const char* filename) {
+    int fd = fs_find_file(filename);
+    if (fd >= 0) {
+        // File found
+        return fd;
+    }
+
+    // File not found so create it
+    fd = fs_create_file(filename);
+    if (fd >= 0) {
+        return fd;
+    }
+
+    // No file found and could not be created
+    return -1;
+}
+
+int syscall_read(int fd, char* buffer, uint32_t size) {
+    return fs_read_file(fd, (uint8_t*)buffer, size);
+}
+
+int syscall_write(int fd, const uint8_t* buffer, uint32_t size) {
+    return fs_write_file(fd, buffer, size);
+}
+
+int syscall_delete(const char* filename) {
+    int fd = fs_find_file(filename);
+    if (fd >= 0) {
+        return fs_delete_file(fd);
+    }
+
+    return -1;
+}
+
+int syscall_get_pid() {
+    return get_pid();
+}
+
 int syscall_dispatcher(syscall_regs_t regs) {
     switch (regs.eax) {
         case 0:
@@ -29,6 +68,21 @@ int syscall_dispatcher(syscall_regs_t regs) {
             break;
         case 1:
             return syscall_exit(regs.ebx);
+            break;
+        case 2:
+            return syscall_open((const char*) regs.ebx);
+            break;
+        case 3:
+            return syscall_read(regs.ebx, (char*) regs.ecx, regs.edx);
+            break;
+        case 4:
+            return syscall_write(regs.ebx, (const uint8_t*) regs.ecx, regs.edx);
+            break;
+        case 5:
+            return syscall_delete((const char*) regs.ebx);
+            break;
+        case 6:
+            return syscall_get_pid();
             break;
         default:
             printf("Unknown syscall\n");
