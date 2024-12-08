@@ -57,7 +57,19 @@ int fs_read_file(int fd, uint8_t *buffer, uint32_t size) {
 
     memcpy(buffer, root_directory->files[fd].data, root_directory->files[fd].size);
 
-    return 0;
+    printf("Buffer: %s\n", buffer);
+
+    return size;
+}
+
+int fs_find_file(const char *name) {
+    for (uint32_t i = 0; i < MAX_FILE_COUNT; i++) {
+        if (root_directory->files[i].used && strcmp(root_directory->files[i].name, name) == 0) {
+            return i;
+        }
+    }
+
+    return -1;
 }
 
 int fs_delete_file(int fd) {

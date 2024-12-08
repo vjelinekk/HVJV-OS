@@ -3,9 +3,9 @@
 - [x] správa uživatelských procesů
 - [x] izolace uživatelských procesů
 - [x] minimalistický souboroý systém
-- [ ] systémové volání
-    - [ ] open, read, write, close
-    - [ ] getpid
+- [x] systémové volání
+    - [x] open, read, write, close
+    - [x] getpid
 - [x] plánovač (round-robin)
 - [x] minimalistická standardní knihovna, linkována staticky
 - [x] ovladače:
