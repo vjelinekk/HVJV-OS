@@ -1,4 +1,4 @@
-#include "kernel/tty.h"
+#include <kernel/tty.h>
 #include <kernel/gdt.h>
 #include <kernel/isr.h>
 #include <kernel/page_allocator.h>
@@ -25,7 +25,7 @@ int8_t last_pid = 0;
 
 void scheduler_init() {
     create_process((char*)&_binary_bin_process_1_bin_start, (uint32_t)&_binary_bin_process_1_bin_size);
-    // create_process((char*)&_binary_bin_process_2_bin_start, (uint32_t)&_binary_bin_process_2_bin_size);
+    create_process((char*)&_binary_bin_process_2_bin_start, (uint32_t)&_binary_bin_process_2_bin_size);
     // // now we have created the processes, we can start the scheduler
     register_interrupt_handler(IRQ0, &schedule);
     // // now we start the first process and enter the user space
@@ -108,6 +108,20 @@ pcb_list_node_t *find_to_switch() {
     return next;
 }
 
+void load_next_process(pcb_list_node_t *next) {
+    // Load the next process's page directory
+    load_page_directory((uint32_t *)next->process.pd_phys);
+
+    // Prepare the next process for execution
+    current = next;  // Update the global current process pointer
+    current->process.state = running;
+    current->process.time_slice = DEFALUT_TIME_SLICE;
+
+    // Switch kernel stack and context
+    tss_switch(current->process.process_kernel_stack);
+    context_switch(current->process.context);
+}
+
 void switch_process(registers_t regs) {
     // Find the next process to switch to
     pcb_list_node_t *next = find_to_switch();
@@ -133,17 +147,8 @@ void switch_process(registers_t regs) {
     // Update the current process state
     current->process.state = runnable;
 
-    // Load the next process's page directory
-    load_page_directory((uint32_t *)next->process.pd_phys);
-
-    // Prepare the next process for execution
-    current = next;  // Update the global current process pointer
-    current->process.state = running;
-    current->process.time_slice = DEFALUT_TIME_SLICE;
-
-    // Switch kernel stack and context
-    tss_switch(current->process.process_kernel_stack);
-    context_switch(current->process.context);
+    // Load the next process
+    load_next_process(next);
 }
 
 
@@ -152,6 +157,39 @@ void enter_user_space(pcb_list_node_t *process_node) {
     tss_switch(process_node->process.process_kernel_stack);
     load_page_directory((uint32_t*)process_node->process.pd_phys);
     jump_usermode();
+}
+
+void process_exit() {
+    // find next process to switch to
+    pcb_list_node_t *next = find_to_switch();
+    if (next == current) {
+        // all processes are either blocked or finished
+        // stay in infinite loop
+        printf("All processes finished\n");
+        printf("Last process PID: %d\n", current->process.pid);
+        while(1);
+        return;
+    }
+
+    // free current process resources
+    uint32_t next_stack_page = USER_STACK_ADDRESS;
+    for (uint32_t i = 0; i < USER_STACK_SIZE; i++) {
+        free_page(next_stack_page, 0, current->process.page_directory_v);
+        next_stack_page -= PAGE_SIZE;
+    }
+
+    uint32_t next_code_page = USER_CODE_ADDRESS;
+    for (uint32_t i = 0; i < USER_CODE_SIZE; i++) {
+        free_page(next_code_page, 0, current->process.page_directory_v);
+        next_code_page += PAGE_SIZE;
+    }
+
+    // remove the current process from the list
+    current->previous->next = current->next;
+    current->next->previous = current->previous;
+
+    // Load next process
+    load_next_process(next);
 }
 
 void schedule(registers_t regs) {

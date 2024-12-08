@@ -1,9 +1,10 @@
+#include <kernel/scheduler.h>
 #include <kernel/tty.h>
 #include <kernel/syscall.h>
 #include <stdint.h>
 #include <stdio.h>
 
-int syscall_write(const char* data, uint32_t length) {
+int syscall_printf(const char* data, uint32_t length) {
     if (!data || length <= 0) {
         return -1;
     }
@@ -16,13 +17,18 @@ int syscall_write(const char* data, uint32_t length) {
     return length;
 }
 
+int syscall_exit(int return_code) {
+    process_exit();
+    return 0;
+}
+
 int syscall_dispatcher(syscall_regs_t regs) {
     switch (regs.eax) {
         case 0:
-            return syscall_write((const char*) regs.ebx, regs.ecx);
+            return syscall_printf((const char*) regs.ebx, regs.ecx);
             break;
         case 1:
-            printf("Syscall 1\n");
+            return syscall_exit(regs.ebx);
             break;
         default:
             printf("Unknown syscall\n");
