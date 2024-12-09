@@ -13,6 +13,7 @@ void enter_user_space(pcb_list_node_t *process_node);
 void switch_process(registers_t regs);
 void process_exit();
 int get_pid();
+pcb_list_node_t *get_current_process();
 void schedule(registers_t regs);
 void scheduler_print();
 

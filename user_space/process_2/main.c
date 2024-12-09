@@ -1,11 +1,16 @@
+#include <shared_memory.h>
 #include <stdio.h>
-#include <process.h>
 
 int main() {
-    for (int i = 0; i < 10; i++) {
-        printf("Hello from process 2\n");
+    shared_memory_t *shared_memory = (shared_memory_t *)get_shared_memory();
+
+    while (1) {
+        if (shared_memory->is_written == 1) {
+            printf("Data read from shared memory: ");
+            printf("%s\n", shared_memory->data);
+            shared_memory->is_written = 0;
+        }
     }
-    int pid = getpid();
-    printf("Process 2 PID: %d\n", pid);
+
     return 0;
 }

@@ -38,7 +38,6 @@ void init_gdt()
     memset(&tss_entry, 0, sizeof(tss_entry_t));
     tss_entry.ss0 = 0x10;  // Set the kernel stack segment.
     tss_entry.esp0 = 0x0;  // Set the kernel stack pointer.
-    printf("TSS base: %x\n", &tss_entry);
     
     // Add our TSS to the GDT
     gdt_set_gate(5, (uint32_t)&tss_entry, sizeof(tss_entry_t), 0xE9, 0x00);

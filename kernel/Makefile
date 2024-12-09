@@ -46,6 +46,7 @@ kernel/kheap.o \
 kernel/syscall.o \
 kernel/file_system.o \
 kernel/scheduler.o \
+kernel/shared_memory.o \
 
 
 OBJS=\

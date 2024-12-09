@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 void pic_remap(void) {
-    printf("Remapping the IRQ table\n");
     outb(MASTER_COMMAND, ICW1_INIT | ICW1_ICW4); // Start initialization sequence
     outb(SLAVE_COMMAND, ICW1_INIT | ICW1_ICW4);  // Start initialization sequence
     outb(MASTER_DATA, 0x20);                     // Remap to 0x20

@@ -1,16 +1,21 @@
+#include <shared_memory.h>
+#include <stdint.h>
 #include <stdio.h>
-#include <file.h>
-#include <process.h>
+#include <string.h>
 
 int main() {
-    int fd = fopen("file.txt");
-    printf("Process 1 opened file.txt with fd %d\n", fd);
-    int write = fwrite(fd, "Hello in file.txt", 17);
-    printf("Process 1 wrote %d bytes\n", write);
-    char buffer[17];
-    int read = fread(fd, buffer, 17);
-    printf("Process 1 read %d bytes: %s\n", read, buffer);
-    int pid = getpid();
-    printf("Process 1 PID: %d\n", pid);
+    shared_memory_t *shared_memory = (shared_memory_t *)get_shared_memory();
+
+    while (1) {
+        if (shared_memory->is_written == 0) {
+            char *data = "Hello from process 1";
+            uint32_t data_length = strlen(data);
+            memcpy(shared_memory->data, data, data_length);
+            shared_memory->is_written = 1;
+            printf("Data written to shared memory\n");
+        }
+    }
+
+
     return 0;
 }

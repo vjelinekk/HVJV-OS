@@ -76,7 +76,6 @@ static block_t *split_aligned_block(block_t *old_block, uint8_t *aligned_address
     // now we need to make the old block smaller and it as free
     old_block->size = bytes_skipped;
     old_block->next = new_block;
-    // printf("Old block size: %d, new block size: %d\n", old_block->size, new_block->size);
 
     return new_block;
 }
@@ -88,7 +87,6 @@ static block_t *find_free_block(uint32_t size, int align) {
         if (align) {
             uint32_t bytes_skipped = 0;
             uint8_t *aligned_address = get_aligned_address_in_block(current_block, size, &bytes_skipped);
-            // printf("Aligned address: %x\n", aligned_address);
             if (aligned_address != NULL) { // there is enough space in the block for an aligned allocation
                 return split_aligned_block(current_block, aligned_address, bytes_skipped);
             }

@@ -10,10 +10,8 @@ uint32_t total_frames;
 void frame_init_allocator(uint32_t total_memory_size) {
     uint32_t frame_count = total_memory_size / FRAME_SIZE;
     total_frames = frame_count;
-    printf("Total frames: %d\n", frame_count);
 
     uint32_t bitmap_size = (frame_count + 7) / 8;
-    printf("Bitmap size: %d\n", bitmap_size);
     frame_bitmap = (uint8_t *)kmalloc_early(bitmap_size);
 
     memset(frame_bitmap, FREE, bitmap_size);

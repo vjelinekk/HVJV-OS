@@ -47,6 +47,7 @@ void set_kheap_initialized();
 page_directory_t *get_kernel_directory();
 page_table_entry_t *get_page(uint32_t virtual_address, int make, int is_user_space, page_directory_t *dir);
 page_table_entry_t *get_kernel_page(uint32_t virtual_address, int make);
+int map_page_to_directory(page_table_entry_t *page, uint32_t virtual_address, page_directory_t *dir);
 uint32_t virt_to_phys(uint32_t virtual_address, page_directory_t *dir);
 
 #endif // !PAGING_H

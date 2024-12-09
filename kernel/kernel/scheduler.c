@@ -55,7 +55,7 @@ void map_process_pages(pcb_list_node_t *process_node) {
     }
 
     process_node->process.page_directory_v = process_directory;
-    process_node->process.context.esp = next_stack_page;
+    process_node->process.context.esp = USER_STACK_ADDRESS;
     process_node->process.context.eip = USER_CODE_ADDRESS;
     process_node->process.context.ebp = next_stack_page;
     process_node->process.context.eflags = 0x202;
@@ -194,6 +194,10 @@ void process_exit() {
 
 int get_pid() {
     return current->process.pid;
+}
+
+pcb_list_node_t *get_current_process() {
+    return current;
 }
 
 void schedule(registers_t regs) {

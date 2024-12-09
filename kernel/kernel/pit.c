@@ -5,8 +5,6 @@
 #include <kernel/scheduler.h>
 
 void init_timer(uint32_t frequency) {
-    printf("Initializing PIT timer\n");
-
     uint32_t divisor;
     if(frequency)
         divisor = PIT_NATURAL_FREQ / frequency;

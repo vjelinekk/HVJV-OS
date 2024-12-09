@@ -42,14 +42,18 @@ void terminal_putchar(char c) {
 	unsigned char uc = c;
     if (c == '\n') {
         terminal_column = 0;
-        if (++terminal_row == VGA_HEIGHT)
+        if (++terminal_row == VGA_HEIGHT) {
             terminal_row = 0; // Or implement scrolling here
+            terminal_clear();
+        }
     } else {
         terminal_putentryat(uc, terminal_color, terminal_column, terminal_row);
         if (++terminal_column == VGA_WIDTH) {
             terminal_column = 0;
-            if (++terminal_row == VGA_HEIGHT)
+            if (++terminal_row == VGA_HEIGHT) {
                 terminal_row = 0; // Or implement scrolling here
+                terminal_clear();
+            }
         }
     }
 }

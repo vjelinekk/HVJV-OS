@@ -9,7 +9,7 @@
 
 #define USER_STACK_SIZE 1000 // number of pages
 #define USER_CODE_SIZE 16 // number of pages
-#define USER_STACK_ADDRESS 0x60000000 
+#define USER_STACK_ADDRESS 0xC0000000 
 #define USER_CODE_ADDRESS 0x8000
 
 enum  process_state {
