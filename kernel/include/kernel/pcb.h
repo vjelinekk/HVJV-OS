@@ -1,8 +1,7 @@
-
 #ifndef PCB_H
 #define PCB_H
 
-#include "kernel/paging.h"
+#include <kernel/paging.h>
 #include <stdint.h>
 
 #define DEFALUT_TIME_SLICE 0x50
@@ -38,6 +37,8 @@ struct pcb_block {
     uint32_t time_slice;
     page_directory_t *page_directory_v; // page directory virtual adress
     uint32_t pd_phys;
+    uint32_t heap_pages_count;
+    uint32_t heap_last_page_address;
 };
 
 struct pcb_list_node {

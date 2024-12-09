@@ -48,6 +48,7 @@ stdio/putchar.o \
 stdio/puts.o \
 stdlib/abort.o \
 stdlib/itoa.o \
+stdlib/malloc.o \
 string/memcmp.o \
 string/memcpy.o \
 string/memmove.o \

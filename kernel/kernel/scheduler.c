@@ -92,6 +92,8 @@ void create_process(char *process_start, uint32_t process_size) {
     new_process->process.state = state_new;
     new_process->process.time_slice = DEFALUT_TIME_SLICE;
     new_process->process.process_kernel_stack = (uint32_t)kmalloc_a(1024) + 1024;
+    new_process->process.heap_pages_count = 0;
+    new_process->process.heap_last_page_address = USER_SPACE_HEAP_START;
 
     map_process_pages(new_process);
     load_process_code(new_process, process_start, process_size);

@@ -1,3 +1,5 @@
+#include "kernel/page_allocator.h"
+#include "kernel/pcb.h"
 #include <kernel/shared_memory.h>
 #include <kernel/file_system.h>
 #include <kernel/scheduler.h>
@@ -58,6 +60,11 @@ int syscall_delete(const char* filename) {
     return -1;
 }
 
+int syscall_get_heap_pages() {
+    pcb_list_node_t *process = get_current_process();
+    return alloc_user_heap_pages(process);
+}
+
 int syscall_get_pid() {
     return get_pid();
 }
@@ -92,6 +99,9 @@ int syscall_dispatcher(syscall_regs_t regs) {
             break;
         case 7:
             return syscall_allocate_shared_memory();
+            break;
+        case 8:
+            return syscall_get_heap_pages();
             break;
         default:
             printf("Unknown syscall\n");

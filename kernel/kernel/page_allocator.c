@@ -55,3 +55,22 @@ void free_page(uint32_t virtual_address, int is_kernel, page_directory_t *dir) {
 
     flush_tlb();
 }
+
+int alloc_user_heap_pages(pcb_list_node_t *process) {
+    uint32_t heap = process->process.heap_last_page_address;
+
+    for (uint32_t i = 0; i < 10; i++) {
+        page_table_entry_t *page = alloc_page(heap, 1, process->process.page_directory_v);
+        if (page == NULL) {
+            printf("Failed to allocate heap page\n");
+            return 0;
+        }
+
+        heap += PAGE_SIZE;
+    }
+
+    process->process.heap_pages_count += 10;
+    process->process.heap_last_page_address = heap;
+
+    return process->process.heap_pages_count;
+}
