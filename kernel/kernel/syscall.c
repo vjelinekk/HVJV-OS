@@ -1,3 +1,4 @@
+#include <kernel/shared_memory.h>
 #include <kernel/file_system.h>
 #include <kernel/scheduler.h>
 #include <kernel/tty.h>
@@ -61,6 +62,11 @@ int syscall_get_pid() {
     return get_pid();
 }
 
+int syscall_allocate_shared_memory() {
+    pcb_list_node_t *process = get_current_process();
+    return allocate_shared_memory_for_process(process);
+}
+
 int syscall_dispatcher(syscall_regs_t regs) {
     switch (regs.eax) {
         case 0:
@@ -83,6 +89,9 @@ int syscall_dispatcher(syscall_regs_t regs) {
             break;
         case 6:
             return syscall_get_pid();
+            break;
+        case 7:
+            return syscall_allocate_shared_memory();
             break;
         default:
             printf("Unknown syscall\n");

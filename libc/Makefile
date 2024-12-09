@@ -59,6 +59,7 @@ file/fopen.o \
 file/fread.o \
 file/fwrite.o \
 process/getpid.o \
+shared_memory/get_shared_memory.o \
 
 HOSTEDOBJS=\
 $(ARCH_HOSTEDOBJS) \

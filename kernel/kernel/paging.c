@@ -43,7 +43,6 @@ void set_kheap_initialized() {
 }
 
 void paging_init(uint32_t total_memory_size) {
-    printf("Initializing paging\n");
     frame_init_allocator(total_memory_size);
 
     kernel_directory = (page_directory_t*)kmalloc_early_a(sizeof(page_directory_t));
@@ -86,8 +85,6 @@ void paging_init(uint32_t total_memory_size) {
 
     // Register page fault handler
     register_interrupt_handler(PAGE_FAULT, page_fault_handler);
-
-    printf("Paging initialized\n");
 }
 
 page_table_entry_t *get_page(uint32_t virtual_address, int make, int is_user_space, page_directory_t *dir) {
@@ -106,8 +103,6 @@ page_table_entry_t *get_page(uint32_t virtual_address, int make, int is_user_spa
         uint32_t phys_addr;
         if (kheap_initialized) {
             table = (page_table_t *)kmalloc_ap(sizeof(page_table_t), &phys_addr);
-            // printf("table: %x\n", table);
-            // printf("phys: %x\n", phys_addr);
         } else {
             table = (page_table_t *)kmalloc_early_a(sizeof(page_table_t));
             phys_addr = (uint32_t)table - KERNEL_VIRTUAL_BASE;
@@ -119,7 +114,6 @@ page_table_entry_t *get_page(uint32_t virtual_address, int make, int is_user_spa
         
         dir->tables[table_index] = table;
         memset(dir->tables[table_index], 0, sizeof(page_table_t));
-        // printf("phys_addr: %x\n", phys_addr);
 
         uint32_t phys_addr_with_flags = phys_addr | PAGE_PRESENT | PAGE_WRITE;
         if (is_user_space) {
@@ -136,6 +130,39 @@ page_table_entry_t *get_page(uint32_t virtual_address, int make, int is_user_spa
 
 page_table_entry_t *get_kernel_page(uint32_t virtual_address, int make) {
     return get_page(virtual_address, make, 0, kernel_directory);
+}
+
+int map_page_to_directory(page_table_entry_t *page, uint32_t virtual_address, page_directory_t *dir) {
+    if (dir == NULL) {
+        return 0;
+    }
+
+    uint32_t table_index = virtual_address >> 22;
+    uint32_t page_index = (virtual_address >> 12) & 0x3FF;
+
+    if (dir->tables[table_index] == NULL) {
+        page_table_t *table;
+        uint32_t phys_addr;
+        if (kheap_initialized) {
+            table = (page_table_t *)kmalloc_ap(sizeof(page_table_t), &phys_addr);
+        } else {
+            table = (page_table_t *)kmalloc_early_a(sizeof(page_table_t));
+            phys_addr = (uint32_t)table - KERNEL_VIRTUAL_BASE;
+        }
+
+        if (table == NULL) {
+            return 0;
+        }
+
+        dir->tables[table_index] = table;
+        memset(dir->tables[table_index], 0, sizeof(page_table_t));
+
+        uint32_t phys_addr_with_flags = phys_addr | PAGE_PRESENT | PAGE_WRITE;
+        dir->physical_tables[table_index] = phys_addr_with_flags;
+    }
+
+    dir->tables[table_index]->pages[page_index] = *page;
+    return 1;
 }
 
 uint32_t virt_to_phys(uint32_t virtual_address, page_directory_t *dir) {
