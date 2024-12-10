@@ -7,7 +7,11 @@ int main() {
     while (1) {
         if (shared_memory->is_written == 1) {
             printf("Data read from shared memory: ");
-            printf("%s\n", shared_memory->data);
+            int *data = (int *)shared_memory->data;
+            for (int i = 0; i < 10; i++) {
+                printf("%d ", data[i]);
+            }
+            printf("\n");
             shared_memory->is_written = 0;
         }
     }

@@ -35,9 +35,37 @@ int fs_write_file(int fd, const uint8_t *data, uint32_t size) {
         return -1;
     }
 
+    if (size > MAX_FILE_SIZE) {
+        return -1;
+    }
+
     root_directory->files[fd].data = kmalloc(size);
     memcpy(root_directory->files[fd].data, data, size);
     root_directory->files[fd].size = size;
+
+    return 0;
+}
+
+int fs_append(int fd, const uint8_t *data, uint32_t size) {
+    if (fd < 0 || fd >= MAX_FILE_COUNT) {
+        return -1;
+    }
+
+    if (!root_directory->files[fd].used) {
+        return -1;
+    }
+
+    if (size + root_directory->files[fd].size > MAX_FILE_SIZE) {
+        return -1;
+    }
+
+    uint8_t *new_data = kmalloc(size + root_directory->files[fd].size);
+    memcpy(new_data, root_directory->files[fd].data, root_directory->files[fd].size);
+    memcpy(new_data + root_directory->files[fd].size, data, size);
+
+    kfree(root_directory->files[fd].data);
+    root_directory->files[fd].data = new_data;
+    root_directory->files[fd].size += size;
 
     return 0;
 }
@@ -51,13 +79,15 @@ int fs_read_file(int fd, uint8_t *buffer, uint32_t size) {
         return -1;
     }
 
-    if (size < root_directory->files[fd].size) {
+    if (root_directory->files[fd].data == NULL) {
         return -1;
     }
 
-    memcpy(buffer, root_directory->files[fd].data, root_directory->files[fd].size);
+    if (size > MAX_FILE_SIZE) {
+        return -1;
+    }
 
-    printf("Buffer: %s\n", buffer);
+    memcpy(buffer, root_directory->files[fd].data, size);
 
     return size;
 }

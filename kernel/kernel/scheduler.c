@@ -20,12 +20,16 @@ extern uint32_t _binary_bin_process_1_bin_size;
 extern uint32_t _binary_bin_process_2_bin_start;
 extern uint32_t _binary_bin_process_2_bin_size;
 
+extern uint32_t _binary_bin_shell_bin_start;
+extern uint32_t _binary_bin_shell_bin_size;
+
 pcb_list_node_t *current;
 int8_t last_pid = 0;
 
 void scheduler_init() {
-    create_process((char*)&_binary_bin_process_1_bin_start, (uint32_t)&_binary_bin_process_1_bin_size);
-    create_process((char*)&_binary_bin_process_2_bin_start, (uint32_t)&_binary_bin_process_2_bin_size);
+    create_process((char*)&_binary_bin_shell_bin_start, (uint32_t)&_binary_bin_shell_bin_size, state_new);
+    create_process((char*)&_binary_bin_process_1_bin_start, (uint32_t)&_binary_bin_process_1_bin_size, blocked);
+    create_process((char*)&_binary_bin_process_2_bin_start, (uint32_t)&_binary_bin_process_2_bin_size, blocked);
     // // now we have created the processes, we can start the scheduler
     register_interrupt_handler(IRQ0, &schedule);
     // // now we start the first process and enter the user space
@@ -71,7 +75,7 @@ void load_process_code(pcb_list_node_t *process_node, char *process_start, uint3
 }   
 
 
-void create_process(char *process_start, uint32_t process_size) {
+void create_process(char *process_start, uint32_t process_size, enum process_state state) {
     pcb_list_node_t *new_process = (pcb_list_node_t*)kmalloc(sizeof(pcb_list_node_t));   
 
     if(current == NULL) {
@@ -89,7 +93,7 @@ void create_process(char *process_start, uint32_t process_size) {
     }
 
     new_process->process.pid = last_pid++;
-    new_process->process.state = state_new;
+    new_process->process.state = state;
     new_process->process.time_slice = DEFALUT_TIME_SLICE;
     new_process->process.process_kernel_stack = (uint32_t)kmalloc_a(1024) + 1024;
 

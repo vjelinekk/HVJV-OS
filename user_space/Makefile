@@ -26,7 +26,7 @@ OBJ_DIR := obj
 OBJ_COPY := objcopy
 OBJ_DUMP := objdump
 
-TASK_DIRS := process_1 process_2 # List of task directories
+TASK_DIRS := process_1 process_2 shell # List of task directories
 TASK_OBJS := $(addsuffix .o, $(TASK_DIRS))
 
 CRT0_OBJ := crt0.o
