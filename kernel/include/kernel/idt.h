@@ -125,10 +125,26 @@ extern void irq15();
 
 extern void syscall_handler();
 
+/**
+ * Set the value of one IDT entry.
+ * 
+ * @param num The index of the IDT entry
+ * @param base The base address
+ * @param sel The selector
+ * @param flags The flags
+ */
 void idt_set_descriptor(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags);
 
+/**
+ * Load the IDT to the CPU
+ * 
+ * @param idt_ptr The IDT pointer
+ */
 extern void load_idt(idt_ptr_t*);
 
+/**
+ * Initialize the IDT
+ */
 void init_idt(void);
 
 #endif // IDT_H

@@ -13,6 +13,7 @@ int syscall_putchar(char c) {
 }
 
 int syscall_exit(int return_code) {
+    // currently there is no usage for return_code
     process_exit();
     return 0;
 }
@@ -66,6 +67,9 @@ int syscall_start_simulation() {
 }
 
 int syscall_dispatcher(syscall_regs_t regs) {
+    // For simplicity we are using a switch statement to determine the syscall
+    // This is not the most efficient way to do this in the future we will use a
+    // array of function pointers to call the correct syscall
     switch (regs.eax) {
         case 0:
             return syscall_putchar(regs.ebx);

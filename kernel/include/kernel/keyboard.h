@@ -33,7 +33,16 @@
 #define BUFFLEN 128
 
 
+/**
+ * Initialize the keyboard
+ */
 void init_keyboard();
+
+/**
+ * Get the ASCII character from the keyboard
+ * 
+ * @return char
+ */
 char get_ascii_char();
 
 #endif // !KEYBOARD_H

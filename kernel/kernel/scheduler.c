@@ -210,10 +210,7 @@ void process_exit() {
     // find next process to switch to
     pcb_list_node_t *next = find_to_switch();
     if (next == current) {
-        printf("Current: %d\n", current->process.pid);
-        printf("Next: %d\n", next->process.pid);
-        // all processes are either blocked or finished
-        printf("Simulation finished\n");
+        printf("No more processes to run\n");
         while (1);
         return;
     }
