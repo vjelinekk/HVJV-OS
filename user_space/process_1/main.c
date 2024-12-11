@@ -17,6 +17,7 @@ int random_range(int min, int max) {
 
 int main() {
     shared_memory_t *shared_memory = (shared_memory_t *)get_shared_memory();
+    static int runs = 0;
 
     while (1) {
         if (shared_memory->is_written == 0) {
@@ -27,6 +28,11 @@ int main() {
             memcpy(shared_memory->data, rand_numbers, sizeof(rand_numbers));
             printf("10 random numbers written shared memory\n");
             shared_memory->is_written = 1;
+            runs++;
+        }
+        if (runs == 3) {
+            runs = 0;
+            break;
         }
     }
 

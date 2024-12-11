@@ -3,6 +3,7 @@
 
 int main() {
     shared_memory_t *shared_memory = (shared_memory_t *)get_shared_memory();
+    static int runs = 0;
 
     while (1) {
         if (shared_memory->is_written == 1) {
@@ -13,6 +14,11 @@ int main() {
             }
             printf("\n");
             shared_memory->is_written = 0;
+            runs++;
+        }
+        if (runs == 3) {
+            runs = 0;
+            break;
         }
     }
 

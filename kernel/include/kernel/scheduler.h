@@ -14,6 +14,7 @@ void switch_process(registers_t regs);
 void process_exit();
 int get_pid();
 pcb_list_node_t *get_current_process();
+void start_simulation();
 void schedule(registers_t regs);
 void scheduler_print();
 

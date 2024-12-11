@@ -11,6 +11,9 @@ void fs_init() {
     for (uint32_t i = 0; i < MAX_FILE_COUNT; i++) {
         root_directory->files[i].used = 0;
     }
+
+    // create stdin file
+    fs_create_file("stdin");
 }
 
 int fs_create_file(const char *name) {
@@ -18,7 +21,9 @@ int fs_create_file(const char *name) {
         if (!root_directory->files[i].used) {
             root_directory->files[i].used = 1;
             strcpy(root_directory->files[i].name, name);
-            root_directory->files[i].data = NULL;
+            root_directory->files[i].data = kmalloc(MAX_FILE_SIZE);
+            memset(root_directory->files[i].data, 0, MAX_FILE_SIZE);
+            root_directory->files[i].data[MAX_FILE_SIZE - 1] = EOF;
             root_directory->files[i].size = 0;
             return i; // Return the file descriptor
         }
@@ -59,7 +64,8 @@ int fs_append(int fd, const uint8_t *data, uint32_t size) {
         return -1;
     }
 
-    uint8_t *new_data = kmalloc(size + root_directory->files[fd].size);
+    uint8_t *new_data = kmalloc(MAX_FILE_SIZE);
+    memset(new_data, 0, MAX_FILE_SIZE);
     memcpy(new_data, root_directory->files[fd].data, root_directory->files[fd].size);
     memcpy(new_data + root_directory->files[fd].size, data, size);
 
@@ -79,7 +85,7 @@ int fs_read_file(int fd, uint8_t *buffer, uint32_t size) {
         return -1;
     }
 
-    if (root_directory->files[fd].data == NULL) {
+    if (root_directory->files[fd].data[0] == 0) {
         return -1;
     }
 

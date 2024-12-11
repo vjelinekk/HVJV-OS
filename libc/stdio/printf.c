@@ -6,28 +6,11 @@
 #include <string.h>
 
 static bool print(const char* data, size_t length) {
-    #if defined(__is_libk)
 	const unsigned char* bytes = (const unsigned char*) data;
 	for (size_t i = 0; i < length; i++)
 		if (putchar(bytes[i]) == EOF)
 			return false;
 	return true;
-    #else
-    int result;
-    asm volatile (
-        "movl $0, %%eax\n"    // Syscall number for write (0)
-        "movl %1, %%ebx\n"    // Argument 1: pointer to message
-        "movl %2, %%ecx\n"    // Argument 2: length of message
-        "int $0x80\n"         // Trigger syscall
-        "movl %%eax, %0\n"    // Return value in eax
-        : "=r"(result)        // Output
-        : "r"(data), "r"(length) // Inputs
-        : "eax", "ebx", "ecx" // Clobbered registers
-    );
-    if (result < 0)
-        return false;
-    return true;
-    #endif
 }
 
 int printf(const char* restrict format, ...) {
