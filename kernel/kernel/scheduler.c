@@ -20,12 +20,20 @@ extern uint32_t _binary_bin_process_1_bin_size;
 extern uint32_t _binary_bin_process_2_bin_start;
 extern uint32_t _binary_bin_process_2_bin_size;
 
+extern uint32_t _binary_bin_shell_bin_start;
+extern uint32_t _binary_bin_shell_bin_size;
+
 pcb_list_node_t *current;
 int8_t last_pid = 0;
+int active_processes = 0;
 
 void scheduler_init() {
-    create_process((char*)&_binary_bin_process_1_bin_start, (uint32_t)&_binary_bin_process_1_bin_size);
-    create_process((char*)&_binary_bin_process_2_bin_start, (uint32_t)&_binary_bin_process_2_bin_size);
+    // PID 0
+    create_process((char*)&_binary_bin_shell_bin_start, (uint32_t)&_binary_bin_shell_bin_size, state_new);
+    // PID 1
+    create_process((char*)&_binary_bin_process_1_bin_start, (uint32_t)&_binary_bin_process_1_bin_size, blocked);
+    // PID 2
+    create_process((char*)&_binary_bin_process_2_bin_start, (uint32_t)&_binary_bin_process_2_bin_size, blocked);
     // // now we have created the processes, we can start the scheduler
     register_interrupt_handler(IRQ0, &schedule);
     // // now we start the first process and enter the user space
@@ -71,7 +79,7 @@ void load_process_code(pcb_list_node_t *process_node, char *process_start, uint3
 }   
 
 
-void create_process(char *process_start, uint32_t process_size) {
+void create_process(char *process_start, uint32_t process_size, enum process_state state) {
     pcb_list_node_t *new_process = (pcb_list_node_t*)kmalloc(sizeof(pcb_list_node_t));   
 
     if(current == NULL) {
@@ -89,7 +97,7 @@ void create_process(char *process_start, uint32_t process_size) {
     }
 
     new_process->process.pid = last_pid++;
-    new_process->process.state = state_new;
+    new_process->process.state = state;
     new_process->process.time_slice = DEFALUT_TIME_SLICE;
     new_process->process.process_kernel_stack = (uint32_t)kmalloc_a(1024) + 1024;
 
@@ -144,8 +152,11 @@ void switch_process(registers_t regs) {
     current->process.context.ds = regs.ds;
     current->process.context.ss = regs.ss;
 
-    // Update the current process state
-    current->process.state = runnable;
+    if (current->process.state == blocked) {
+        current->process.state = blocked;
+    } else {
+        current->process.state = runnable;
+    }
 
     // Load the next process
     load_next_process(next);
@@ -159,34 +170,53 @@ void enter_user_space(pcb_list_node_t *process_node) {
     jump_usermode();
 }
 
+
+pcb_list_node_t *get_process_by_pid(int pid) {
+    pcb_list_node_t *node = current;
+    while (node->process.pid != pid) {
+        node = node->next;
+        if (node == current) {
+            return NULL;
+        }
+    }
+
+    return node;
+}
+
 void process_exit() {
+    active_processes--;
+
+    // mark current as blocked
+    current->process.state = blocked;
+
+    // restart its registers
+    current->process.context.eax = 0;
+    current->process.context.ebx = 0;
+    current->process.context.ecx = 0;
+    current->process.context.edx = 0;
+    current->process.context.ebp = 0;
+    current->process.context.esi = 0;
+    current->process.context.edi = 0;
+    current->process.context.esp = USER_STACK_ADDRESS;
+    current->process.context.eip = USER_CODE_ADDRESS;
+    current->process.context.eflags = 0x202;
+
+    if (active_processes == 0) {
+        current = get_process_by_pid(0);
+        load_next_process(current);
+        return;
+    }
+    
     // find next process to switch to
     pcb_list_node_t *next = find_to_switch();
     if (next == current) {
+        printf("Current: %d\n", current->process.pid);
+        printf("Next: %d\n", next->process.pid);
         // all processes are either blocked or finished
-        // stay in infinite loop
-        printf("All processes finished\n");
-        printf("Last process PID: %d\n", current->process.pid);
-        while(1);
+        printf("Simulation finished\n");
+        while (1);
         return;
     }
-
-    // free current process resources
-    uint32_t next_stack_page = USER_STACK_ADDRESS;
-    for (uint32_t i = 0; i < USER_STACK_SIZE; i++) {
-        free_page(next_stack_page, 0, current->process.page_directory_v);
-        next_stack_page -= PAGE_SIZE;
-    }
-
-    uint32_t next_code_page = USER_CODE_ADDRESS;
-    for (uint32_t i = 0; i < USER_CODE_SIZE; i++) {
-        free_page(next_code_page, 0, current->process.page_directory_v);
-        next_code_page += PAGE_SIZE;
-    }
-
-    // remove the current process from the list
-    current->previous->next = current->next;
-    current->next->previous = current->previous;
 
     // Load next process
     load_next_process(next);
@@ -210,6 +240,21 @@ void schedule(registers_t regs) {
     } else {
         switch_process(regs);
     }
+}
+
+void start_simulation() {
+    // find PID 1 and PID 2
+    pcb_list_node_t *pid1 = get_process_by_pid(1);
+    pcb_list_node_t *pid2 = get_process_by_pid(2);
+
+    // set PID 1 adn PID 2 to running
+    pid1->process.state = runnable;
+    active_processes++;
+    pid2->process.state = runnable;
+    active_processes++;
+
+    current->process.time_slice = 0;
+    current->process.state = blocked;
 }
 
 void scheduler_print() {

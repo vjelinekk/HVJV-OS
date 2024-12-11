@@ -6,17 +6,10 @@
 #include <stdint.h>
 #include <stdio.h>
 
-int syscall_printf(const char* data, uint32_t length) {
-    if (!data || length <= 0) {
-        return -1;
-    }
+int syscall_putchar(char c) {
+    terminal_write(&c, sizeof(c));
 
-    for (uint32_t i = 0; i < length; i++) {
-        char c = data[i];
-        terminal_write(&c, sizeof(c));
-    }
-
-    return length;
+    return 1;
 }
 
 int syscall_exit(int return_code) {
@@ -67,10 +60,15 @@ int syscall_allocate_shared_memory() {
     return allocate_shared_memory_for_process(process);
 }
 
+int syscall_start_simulation() {
+    start_simulation();
+    return 1;
+}
+
 int syscall_dispatcher(syscall_regs_t regs) {
     switch (regs.eax) {
         case 0:
-            return syscall_printf((const char*) regs.ebx, regs.ecx);
+            return syscall_putchar(regs.ebx);
             break;
         case 1:
             return syscall_exit(regs.ebx);
@@ -92,6 +90,9 @@ int syscall_dispatcher(syscall_regs_t regs) {
             break;
         case 7:
             return syscall_allocate_shared_memory();
+            break;
+        case 8:
+            return syscall_start_simulation();
             break;
         default:
             printf("Unknown syscall\n");

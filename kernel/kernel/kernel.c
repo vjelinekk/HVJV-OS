@@ -29,6 +29,12 @@ void kernel_main(struct multiboot_info *mbi) {
     paging_init(total_memory_bytes);
     kheap_init();
     fs_init();
+
+    printf("Welcome to HVJV-OS\n");
+    printf("You can start simulation of the OS by typing:\n");
+    printf("`start_simulation`\n");
+    printf("\n");
+
     scheduler_init();
 
     while(1) {

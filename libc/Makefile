@@ -46,6 +46,7 @@ $(ARCH_FREEOBJS) \
 stdio/printf.o \
 stdio/putchar.o \
 stdio/puts.o \
+stdio/getchar.o \
 stdlib/abort.o \
 stdlib/itoa.o \
 string/memcmp.o \
@@ -59,6 +60,7 @@ file/fopen.o \
 file/fread.o \
 file/fwrite.o \
 process/getpid.o \
+process/start_simulation.o \
 shared_memory/get_shared_memory.o \
 
 HOSTEDOBJS=\

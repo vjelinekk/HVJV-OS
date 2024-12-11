@@ -23,6 +23,7 @@ typedef struct directory directory_t;
 void fs_init();
 int fs_create_file(const char *name);
 int fs_write_file(int fd, const uint8_t *data, uint32_t size);
+int fs_append(int fd, const uint8_t *data, uint32_t size);
 int fs_read_file(int fd, uint8_t *buffer, uint32_t size);
 int fs_find_file(const char *name);
 int fs_delete_file(int fd);

@@ -12,7 +12,7 @@
 #define USER_STACK_ADDRESS 0xC0000000 
 #define USER_CODE_ADDRESS 0x8000
 
-enum  process_state {
+enum process_state {
     state_new,
     runnable,
     running,

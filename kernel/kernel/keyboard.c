@@ -1,3 +1,6 @@
+#include "kernel/file_system.h"
+#include "kernel/pcb.h"
+#include "kernel/scheduler.h"
 #include <kernel/idt.h>
 #include <kernel/interrupt_helpers.h>
 #include <kernel/keyboard.h>
@@ -6,6 +9,7 @@
 #include <kernel/pic.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 // Scancode -> ASCII
 const uint8_t lower_ascii_codes[256] = {
@@ -202,7 +206,24 @@ static void poll_keyboard() {
 }
 
 void keyboard_handler(registers_t regs) {
+    pcb_list_node_t *current_process = get_current_process();
+    // only allow keyboard input if the current process is the shell
+    if (current_process && current_process->process.pid != 0) {
+        inb(0x60);
+        return;
+    }
+
+    // check if pressed key is ctrl-c
+
     poll_keyboard();
+    // save pressed key to stdint (FD 0)
+    if (kb_buff_writer != kb_buff_reader) {
+        uint8_t c = kb_buff[kb_buff_reader];
+        kb_buff_reader = (kb_buff_reader + 1) % BUFFLEN;
+        if (current_process) {
+            fs_append(0, &c, 1);
+        }
+    }
 }
 
 void init_keyboard() {
