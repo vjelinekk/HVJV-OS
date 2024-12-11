@@ -12,6 +12,12 @@ struct shared_memory {
 typedef struct shared_memory shared_memory_t;
     
 
+/**
+ * Allocate shared memory for a process
+ * 
+ * @param process The process to allocate shared memory for
+ * @return The address of the shared memory
+ */
 int allocate_shared_memory_for_process(pcb_list_node_t *process);
 
 

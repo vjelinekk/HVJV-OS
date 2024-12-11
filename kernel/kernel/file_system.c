@@ -73,7 +73,7 @@ int fs_append(int fd, const uint8_t *data, uint32_t size) {
     root_directory->files[fd].data = new_data;
     root_directory->files[fd].size += size;
 
-    return 0;
+    return size;
 }
 
 int fs_read_file(int fd, uint8_t *buffer, uint32_t size) {

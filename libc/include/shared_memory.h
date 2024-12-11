@@ -7,6 +7,11 @@ struct shared_memory {
 };
 typedef struct shared_memory shared_memory_t;
 
+/**
+ * Allocate shared memory for a process
+ * 
+ * @return The address of the shared memory
+ */
 void *get_shared_memory();
 
 #endif // !SHARED_MEMORY_H

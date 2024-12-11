@@ -42,12 +42,61 @@ typedef struct {
     uint32_t physical_tables[NUM_PAGES];
 } page_directory_t;
 
+/**
+ * Initialize the paging system
+ * 
+ * @param total_memory_size The total memory size in bytes
+ */
 void paging_init(uint32_t total_memory_size);
+
+/**
+ * Set the kernel heap initialized flag
+ */
 void set_kheap_initialized();
+
+/**
+ * Get the kernel directory
+ * 
+ * @return The kernel page directory
+ */
 page_directory_t *get_kernel_directory();
+
+/**
+ * Get page
+ * 
+ * @param virtual_address The virtual address
+ * @param is_user_space 1 if user space, 0 if kernel space
+ * @param make 1 if the page should be created, 0 if not
+ * @param dir The page directory
+ * @return The page table entry
+ */
 page_table_entry_t *get_page(uint32_t virtual_address, int make, int is_user_space, page_directory_t *dir);
+
+/**
+ * Get kernel page
+ * 
+ * @param virtual_address The virtual address
+ * @param make 1 if the page should be created, 0 if not
+ * @return The page table entry
+ */
 page_table_entry_t *get_kernel_page(uint32_t virtual_address, int make);
+
+/**
+ * Map a page to a directory
+ * 
+ * @param page The page table entry
+ * @param virtual_address The virtual address
+ * @param dir The page directory
+ * @return 0 if successful, -1 otherwise
+ */
 int map_page_to_directory(page_table_entry_t *page, uint32_t virtual_address, page_directory_t *dir);
+
+/**
+ * Get the physical address of a virtual address
+ * 
+ * @param virtual_address The virtual address
+ * @param dir The page directory
+ */
 uint32_t virt_to_phys(uint32_t virtual_address, page_directory_t *dir);
 
 #endif // !PAGING_H

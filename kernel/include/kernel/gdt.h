@@ -31,10 +31,42 @@ extern void load_gdt(gdt_ptr_t * gdt_ptr);
 
 extern void tss_flush();
 
+/**
+ * Initialize the GDT
+ */
 void init_gdt();
+
+/**
+ * Set the value of one GDT entry.
+ * 
+ * @param num The index of the GDT entry
+ * @param base The base address
+ * @param limit The limit
+ * @param access The access flags
+ * @param gran The granularity
+ */
 gdt_ptr_t * get_gdt_ptr();
-gdt_entry_t * get_gdt_entry();
+
+/**
+ * Get the GDT entries
+ * 
+ * @return The GDT entries
+ */
+gdt_entry_t *get_gdt_entries();
+
+/**
+ * Get the GDT entry at the given index
+ * 
+ * @param index The index of the GDT entry
+ * @return The GDT entry
+ */
 gdt_entry_t get_gdt_entry_at(int index);
+
+/**
+ * Switch the TSS
+ * 
+ * @param esp0 The new ESP0
+ */
 void tss_switch(uint32_t esp0);
 
 #endif

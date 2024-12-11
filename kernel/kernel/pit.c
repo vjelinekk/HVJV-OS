@@ -1,5 +1,4 @@
 #include <kernel/pit.h>
-#include <stdio.h>
 #include <kernel/isr.h>
 #include <kernel/port.h>
 #include <kernel/scheduler.h>

@@ -53,7 +53,7 @@ gdt_ptr_t * get_gdt_ptr()
 }
 
 // get the gtd_entry struct
-gdt_entry_t * get_gdt_entry()
+gdt_entry_t * get_gdt_entries()
 {
     return gdt_entries;
 }

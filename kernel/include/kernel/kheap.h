@@ -21,12 +21,47 @@ struct block {
 };
 typedef struct block block_t;
 
+/**
+ * Initialize the kernel heap
+ */
 void kheap_init();
+
+/**
+ * Allocate memory
+ * 
+ * @param size The size of the memory to allocate
+ * @return The pointer to the allocated memory
+ */
 void *kmalloc(uint32_t size);
+
+/**
+ * Allocate aligned memory
+ * 
+ * @param size The size of the memory to allocate
+ * @return The pointer to the allocated memory
+ */
 void *kmalloc_a(uint32_t size);
+
+/**
+ * Allocate aligned memory and get the physical address
+ * 
+ * @param size The size of the memory to allocate
+ * @param phys The physical address of the allocated memory
+ * @return The pointer to the allocated memory
+ */
 void *kmalloc_ap(uint32_t size, uint32_t *phys);
+
+/**
+ * Free memory
+ * 
+ * @param *ptr The pointer to the memory to free
+ * @return void
+ */
 void kfree(void *ptr);
 
+/**
+ * Print the kernel heap
+ */
 void kheap_print();
 
 #endif // !KHEAP_H

@@ -7,6 +7,12 @@ struct syscall_regs {
 } __attribute__((packed));
 typedef struct syscall_regs syscall_regs_t;
 
+/**
+ * The syscall dispatcher
+ * 
+ * @param regs The registers containing the syscall number and arguments
+ * @return The return value of the syscall
+ */
 int syscall_dispatcher(syscall_regs_t regs);
 
 #endif /* ifndef SYSCALL_H */

@@ -10,6 +10,11 @@
 #define PIT_DATA2 0x42
 #define PIT_COMMAND 0x43
 
+/**
+ * Initialize the PIT
+ * 
+ * @param frequency The frequency in Hz
+ */
 void init_timer(uint32_t frequency); //frequency in Hz
 
 #endif // !PIT_H

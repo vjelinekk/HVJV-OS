@@ -1,6 +1,5 @@
 #include <kernel/pic.h>
 #include <kernel/port.h>
-#include <stdio.h>
 
 void pic_remap(void) {
     outb(MASTER_COMMAND, ICW1_INIT | ICW1_ICW4); // Start initialization sequence

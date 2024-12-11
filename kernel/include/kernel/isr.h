@@ -13,8 +13,27 @@ typedef struct registers
 } registers_t;
 
 typedef void (*isr_handler_t)(registers_t);
+
+/**
+ * Register an interrupt handler
+ * 
+ * @param n The interrupt number
+ * @param handler The handler function
+ */
 void register_interrupt_handler(uint8_t n, isr_handler_t handler);
+
+/**
+ * Basic interrupt service routine handler
+ * 
+ * @param regs The register state
+ */
 void isr_handler(registers_t regs);
+
+/**
+ * Basic interrupt request handler
+ * 
+ * @param regs The register state
+ */
 void irq_handler(registers_t regs);
 
 
