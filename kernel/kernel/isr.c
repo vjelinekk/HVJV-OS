@@ -15,6 +15,7 @@ void register_interrupt_handler(uint8_t n, isr_handler_t handler) {
 void isr_handler(registers_t regs) {
     terminal_clear();
     printf("ISR\n");
+    printf("Received interrupt: %x\n", regs.int_no);
     printf("Error code: %x\n", regs.err_code);
     printf("EIP: %x\n", regs.eip);
     printf("CS: %x\n", regs.cs);
@@ -28,6 +29,7 @@ void isr_handler(registers_t regs) {
         interrupt_handlers[regs.int_no](regs);
     }
     printf("End of ISR\n");
+    pause();
 }
 
 void irq_handler(registers_t regs) {

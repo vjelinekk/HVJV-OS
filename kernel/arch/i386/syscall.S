@@ -14,6 +14,6 @@ syscall_handler:
     push %eax
     call syscall_dispatcher
     movl %eax, %ebx # Save return value
-    add $24, %esp  # Clean up stack (3 registers x 4 bytes each)
+    add $24, %esp  # Clean up stack (6 registers x 4 bytes each)
     sti
     iret

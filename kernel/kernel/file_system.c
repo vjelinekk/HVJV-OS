@@ -64,13 +64,8 @@ int fs_append(int fd, const uint8_t *data, uint32_t size) {
         return -1;
     }
 
-    uint8_t *new_data = kmalloc(MAX_FILE_SIZE);
-    memset(new_data, 0, MAX_FILE_SIZE);
-    memcpy(new_data, root_directory->files[fd].data, root_directory->files[fd].size);
-    memcpy(new_data + root_directory->files[fd].size, data, size);
+    memcpy(root_directory->files[fd].data + root_directory->files[fd].size, data, size);
 
-    kfree(root_directory->files[fd].data);
-    root_directory->files[fd].data = new_data;
     root_directory->files[fd].size += size;
 
     return size;

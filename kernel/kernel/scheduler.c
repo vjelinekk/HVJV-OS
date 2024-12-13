@@ -12,6 +12,7 @@
 #include <string.h>
 #include <kernel/port.h>
 #include <kernel/pic.h>
+#include <kernel/pit.h>
 #include <kernel/paging.h>
 
 extern uint32_t _binary_bin_process_1_bin_start;
@@ -30,10 +31,6 @@ int active_processes = 0;
 void scheduler_init() {
     // PID 0
     create_process((char*)&_binary_bin_shell_bin_start, (uint32_t)&_binary_bin_shell_bin_size, state_new);
-    // PID 1
-    create_process((char*)&_binary_bin_process_1_bin_start, (uint32_t)&_binary_bin_process_1_bin_size, blocked);
-    // PID 2
-    create_process((char*)&_binary_bin_process_2_bin_start, (uint32_t)&_binary_bin_process_2_bin_size, blocked);
     // // now we have created the processes, we can start the scheduler
     register_interrupt_handler(IRQ0, &schedule);
     // // now we start the first process and enter the user space
@@ -43,6 +40,10 @@ void scheduler_init() {
 void map_process_pages(pcb_list_node_t *process_node) {
     page_directory_t *kernel_directory = get_kernel_directory();
     page_directory_t *process_directory = (page_directory_t*)kmalloc_a(sizeof(page_directory_t));
+    if (process_directory == NULL) {
+        printf("Failed to allocate page directory\n");
+        return;
+    }
     memcpy(process_directory, kernel_directory, sizeof(page_directory_t));
 
     uint32_t physical_addr = virt_to_phys((uint32_t)&process_directory->physical_tables[0], NULL);
@@ -70,6 +71,12 @@ void map_process_pages(pcb_list_node_t *process_node) {
     process_node->process.context.cs = (3 * 8) | 0x3;
     process_node->process.context.ds = (4 * 8) | 0x3;
     process_node->process.context.ss = (4 * 8) | 0x3;
+    process_node->process.context.eax = 0;
+    process_node->process.context.ebx = 0;
+    process_node->process.context.ecx = 0;
+    process_node->process.context.edx = 0;
+    process_node->process.context.edi = 0;
+    process_node->process.context.esi = 0;
 }
 
 void load_process_code(pcb_list_node_t *process_node, char *process_start, uint32_t process_size) {
@@ -81,6 +88,19 @@ void load_process_code(pcb_list_node_t *process_node, char *process_start, uint3
 
 void create_process(char *process_start, uint32_t process_size, enum process_state state) {
     pcb_list_node_t *new_process = (pcb_list_node_t*)kmalloc(sizeof(pcb_list_node_t));   
+    if (new_process == NULL) {
+        printf("Failed to allocate PCB");
+        return;
+    }
+
+    new_process->process.pid = last_pid++;
+    new_process->process.state = state;
+    new_process->process.time_slice = DEFALUT_TIME_SLICE;
+    new_process->process.process_kernel_stack = (uint32_t)kmalloc_a(1024) + 1024;
+    if (new_process->process.process_kernel_stack == 1024) {
+        printf("Failed to allocate kernel stack\n");
+        return;
+    }
 
     if(current == NULL) {
         current = new_process;
@@ -93,13 +113,7 @@ void create_process(char *process_start, uint32_t process_size, enum process_sta
 
         current->previous->next = new_process;
         current->previous = new_process;
-
     }
-
-    new_process->process.pid = last_pid++;
-    new_process->process.state = state;
-    new_process->process.time_slice = DEFALUT_TIME_SLICE;
-    new_process->process.process_kernel_stack = (uint32_t)kmalloc_a(1024) + 1024;
 
     map_process_pages(new_process);
     load_process_code(new_process, process_start, process_size);
@@ -117,6 +131,10 @@ pcb_list_node_t *find_to_switch() {
 }
 
 void load_next_process(pcb_list_node_t *next) {
+    if (next->process.state == state_new) {
+        active_processes++;
+    }
+
     // Load the next process's page directory
     load_page_directory((uint32_t *)next->process.pd_phys);
 
@@ -186,23 +204,31 @@ pcb_list_node_t *get_process_by_pid(int pid) {
 void process_exit() {
     active_processes--;
 
-    // mark current as blocked
-    current->process.state = blocked;
+    // Free process resources
+    // umap process stack
+    uint32_t next_stack_page = USER_STACK_ADDRESS;
+    for (uint32_t i = 0; i < USER_STACK_SIZE; i++) {
+        free_page(next_stack_page, 0, current->process.page_directory_v);
+        next_stack_page -= PAGE_SIZE;
+    }
 
-    // restart its registers
-    current->process.context.eax = 0;
-    current->process.context.ebx = 0;
-    current->process.context.ecx = 0;
-    current->process.context.edx = 0;
-    current->process.context.ebp = 0;
-    current->process.context.esi = 0;
-    current->process.context.edi = 0;
-    current->process.context.esp = USER_STACK_ADDRESS;
-    current->process.context.eip = USER_CODE_ADDRESS;
-    current->process.context.eflags = 0x202;
+    // umap process code
+    uint32_t next_code_page = USER_CODE_ADDRESS;
+    for (uint32_t i = 0; i < USER_CODE_SIZE; i++) {
+        free_page(next_code_page, 0, current->process.page_directory_v);
+        next_code_page += PAGE_SIZE;
+    }
+
+    // remove the current process from the list
+    current->previous->next = current->next;
+    current->next->previous = current->previous;
+
+    // free the current kmalloc
+    kfree(current);
 
     if (active_processes == 0) {
         current = get_process_by_pid(0);
+        current->process.state = running;
         load_next_process(current);
         return;
     }
@@ -211,6 +237,7 @@ void process_exit() {
     pcb_list_node_t *next = find_to_switch();
     if (next == current) {
         printf("No more processes to run\n");
+        printf("Active processes: %d\n", active_processes);
         while (1);
         return;
     }
@@ -239,26 +266,31 @@ void schedule(registers_t regs) {
     }
 }
 
-void start_simulation() {
-    // find PID 1 and PID 2
-    pcb_list_node_t *pid1 = get_process_by_pid(1);
-    pcb_list_node_t *pid2 = get_process_by_pid(2);
+void start_SM_simulation() {
+    mask_timer();
 
-    // set PID 1 adn PID 2 to running
-    pid1->process.state = runnable;
-    active_processes++;
-    pid2->process.state = runnable;
-    active_processes++;
+    create_process((char*)&_binary_bin_process_1_bin_start, (uint32_t)&_binary_bin_process_1_bin_size, state_new);
+    create_process((char*)&_binary_bin_process_2_bin_start, (uint32_t)&_binary_bin_process_2_bin_size, state_new);
+
+    // now we need to go back to current process page directory
+    load_page_directory((uint32_t*)current->process.pd_phys);
 
     current->process.time_slice = 0;
     current->process.state = blocked;
+
+    unmask_timer();
 }
 
 void scheduler_print() {
+    if (current == NULL) {
+        printf("The scheduler is empty.\n");
+        return;
+    }
+
     pcb_list_node_t *node = current;
-    while (node->next != current) {
+    do {
         printf("pid: %d, state: %d\n", node->process.pid, node->process.state);
         node = node->next;
-    }
+    } while (node != current);
 }
 

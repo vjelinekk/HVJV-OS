@@ -71,7 +71,7 @@ pcb_list_node_t *get_current_process();
 /**
  * Start the simulation
  */
-void start_simulation();
+void start_SM_simulation();
 
 /**
  * Schedule the next process
