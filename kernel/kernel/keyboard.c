@@ -141,6 +141,12 @@ static void poll_keyboard() {
         return;
     }
 
+    if (scancode == 0x1C) { // enter key
+        kb_buff[kb_buff_writer] = '\n';
+        kb_buff_writer = next;
+        return;
+    }
+
     if (scancode & 0x80) { // if scancode has bit 8 set its a key release (0x80 == 10000000)
         uint8_t pressed_key = scancode & 0x7F;
 

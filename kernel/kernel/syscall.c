@@ -15,7 +15,7 @@ int syscall_putchar(char c) {
 int syscall_exit(int return_code) {
     // currently there is no usage for return_code
     process_exit();
-    return 0;
+    return 1;
 }
 
 int syscall_open(const char* filename) {
@@ -62,7 +62,7 @@ int syscall_allocate_shared_memory() {
 }
 
 int syscall_start_simulation() {
-    start_simulation();
+    start_SM_simulation();
     return 1;
 }
 

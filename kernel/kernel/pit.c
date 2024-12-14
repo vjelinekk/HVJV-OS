@@ -1,3 +1,4 @@
+#include <kernel/pic.h>
 #include <kernel/pit.h>
 #include <kernel/isr.h>
 #include <kernel/port.h>
@@ -25,4 +26,12 @@ void init_timer(uint32_t frequency) {
 
     outb(PIT_DATA0, low);
     outb(PIT_DATA0, high);
+}
+
+void mask_timer() {
+    outb(MASTER_DATA, inb(MASTER_DATA) | 0x01);
+}
+
+void unmask_timer() {
+    outb(MASTER_DATA, inb(MASTER_DATA) & ~0x01);
 }

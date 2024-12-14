@@ -17,4 +17,14 @@
  */
 void init_timer(uint32_t frequency); //frequency in Hz
 
+/**
+ * Mask the timer
+ */
+void mask_timer();
+
+/**
+ * Unmask the timer
+ */
+void unmask_timer();
+
 #endif // !PIT_H

@@ -2,11 +2,12 @@
 #include <string.h>
 #include <process.h>
 
+static int simulation_started = 0;
+
 int main() {
     printf("shell> ");
     char buffer[100];
     int i = 0;
-    int simulation_started = 0;
     while (1) {
         while (1) {
             char c = getchar();

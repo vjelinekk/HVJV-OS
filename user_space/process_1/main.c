@@ -1,5 +1,4 @@
 #include <shared_memory.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
